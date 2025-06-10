@@ -1,6 +1,8 @@
 "use client"
 
 import React from 'react';
+import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
+import { Authenticated, Unauthenticated } from 'convex/react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -8,6 +10,8 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
+  const { user } = useUser();
+
   return (
     <div className={`fixed top-8 h-[calc(100vh-4rem)] w-80 bg-white/20 backdrop-blur-xl shadow-lg rounded-2xl border border-white/10 flex flex-col transition-all duration-300 ${isOpen ? 'left-8' : '-left-80'}`}>
       {/* Logo Area */}
@@ -69,17 +73,25 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       </div>
 
       {/* User Account */}
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-white/30 flex items-center justify-center">
-            <span className="text-sm font-medium text-white">JD</span>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-white">John Doe</p>
-            <p className="text-xs text-white/70">john@example.com</p>
+      <Unauthenticated>
+        <div className="p-4 border-t border-white/10 flex flex-col items-center justify-center">
+          <SignInButton />
+        </div>
+      </Unauthenticated>
+
+      <Authenticated>
+        <div className="p-4 border-t border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-white/30 flex items-center justify-center">
+              <span className="text-sm font-medium text-white">{user?.firstName?.charAt(0)}</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">{user?.firstName} {user?.lastName}</p>
+              <SignOutButton />
+            </div>
           </div>
         </div>
-      </div>
+      </Authenticated>
     </div>
   );
 };
