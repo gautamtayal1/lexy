@@ -17,7 +17,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const sendMessage = useMutation(api.messages.send);
 
   return (
-    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] bg-white/30 backdrop-blur-xl shadow-lg rounded-2xl border border-white/20 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow-lg rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
       {/* Toggle Sidebar Button - Only visible when sidebar is closed */}
       {!isSidebarOpen && (
         <button 
@@ -41,17 +41,17 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
         </div>
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t border-white/10">
-        <div className="max-w-[80%] mx-auto">
+      {/* Floating Input Area */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-[90%] max-w-3xl">
+        <div className=" backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-4">
           {/* Model Selection */}
           <div className="flex items-center gap-4 mb-4">
-            <select className="bg-white/20 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30">
+            <select className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30">
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-3.5">GPT-3.5</option>
               <option value="claude">Claude</option>
             </select>
-            <button className="bg-white/20 hover:bg-white/30 text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
+            <button className=" text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
               <FileUp className="h-4 w-4" />    
               Attach PDF
             </button>
@@ -64,17 +64,17 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
-              className="w-full bg-white/20 text-white placeholder-white/50 rounded-lg py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-white/30"
+              className="w-full text-white placeholder-white/50 rounded-xl py-3 px-4 pr-12 focus:outline-none"
             />
             <button 
-            className="absolute right-0 top-0 h-full px-4 text-white hover:text-white/80 transition-colors" 
-            onClick={() => {
-              if (message) {
-                sendMessage({ body: message });
-                setMessage("");
-              }
-            }}
-              >
+              className="absolute right-0 top-0 h-full px-4 text-white hover:text-white/80 transition-colors" 
+              onClick={() => {
+                if (message) {
+                  sendMessage({ body: message });
+                  setMessage("");
+                }
+              }}
+            >
               <ArrowBigUp className="h-5 w-5" />
             </button>
           </div>
