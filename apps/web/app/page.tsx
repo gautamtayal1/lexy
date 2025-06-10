@@ -3,9 +3,7 @@
 import Image from 'next/image'
 import React, { useState } from 'react'
 import Sidebar from './components/Sidebar'
-import ChatArea from './components/Chatarea'
-// import { useQuery } from "convex/react";
-// import { api } from "../convex/_generated/api";
+import ChatArea from './components/ChatArea'
 
 const Page = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

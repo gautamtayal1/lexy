@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "@repo/db/convex/_generated/api";
 import { ArrowBigUp, FileUp, Menu } from "lucide-react";
 import { useCurrentUser } from '../useCurrentUser';
 interface ChatAreaProps {

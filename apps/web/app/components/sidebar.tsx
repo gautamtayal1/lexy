@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
+import { SignInButton, SignOutButton, UserButton, useUser } from '@clerk/nextjs';
 import { Authenticated, Unauthenticated } from 'convex/react';
 
 interface SidebarProps {
@@ -76,6 +76,7 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       <Unauthenticated>
         <div className="p-4 border-t border-white/10 flex flex-col items-center justify-center">
           <SignInButton />
+          <SignOutButton />
         </div>
       </Unauthenticated>
 
@@ -92,6 +93,9 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
           </div>
         </div>
       </Authenticated>
+      <div className="p-4 border-t border-white/10">
+        <UserButton />
+      </div>
     </div>
   );
 };
