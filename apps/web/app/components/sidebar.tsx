@@ -1,13 +1,28 @@
+"use client"
+
 import React from 'react';
 
-const Sidebar = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   return (
-    <div className="fixed top-8 left-8 h-[calc(100vh-4rem)] w-80 bg-white/20 backdrop-blur-xl shadow-lg rounded-2xl border border-white/10 flex flex-col">
+    <div className={`fixed top-8 h-[calc(100vh-4rem)] w-80 bg-white/20 backdrop-blur-xl shadow-lg rounded-2xl border border-white/10 flex flex-col transition-all duration-300 ${isOpen ? 'left-8' : '-left-80'}`}>
       {/* Logo Area */}
-      <div className="p-4 border-b border-white/10">
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <div className="h-12 w-12 bg-white/30 rounded-lg flex items-center justify-center">
           <span className="text-xl font-bold text-white">AI</span>
         </div>
+        <button 
+          onClick={onToggle}
+          className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
       </div>
 
       {/* New Chat Button */}

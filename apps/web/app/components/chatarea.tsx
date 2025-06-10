@@ -2,14 +2,31 @@
 
 import React, { useState } from 'react';
 
-const ChatArea = () => {
+interface ChatAreaProps {
+  isSidebarOpen: boolean;
+  onToggleSidebar: () => void;
+}
+
+const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const [message, setMessage] = useState('');
 
   return (
-    <div className="fixed top-8 left-[24rem] right-8 h-[calc(100vh-4rem)] bg-white/30 backdrop-blur-xl shadow-lg rounded-2xl border border-white/20 flex flex-col">
+    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] bg-white/30 backdrop-blur-xl shadow-lg rounded-2xl border border-white/20 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+      {/* Toggle Sidebar Button - Only visible when sidebar is closed */}
+      {!isSidebarOpen && (
+        <button 
+          onClick={onToggleSidebar}
+          className="absolute -left-12 top-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+          </svg>
+        </button>
+      )}
+
       {/* Chat Messages Area */}
       <div className="flex-1 p-6 overflow-y-auto">
-        <div className="space-y-6">
+        <div className="max-w-[80%] mx-auto space-y-6">
           <div className="flex flex-col space-y-4">
             <div className="bg-white/20 p-4 rounded-lg max-w-[80%] self-start">
               <p className="text-sm text-white">Hello! How can I help you today?</p>
@@ -25,7 +42,7 @@ const ChatArea = () => {
 
       {/* Input Area */}
       <div className="p-4 border-t border-white/10">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-[80%] mx-auto">
           {/* Model Selection */}
           <div className="flex items-center gap-4 mb-4">
             <select className="bg-white/20 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30">
@@ -48,7 +65,7 @@ const ChatArea = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
-              className="w-[80%] bg-white/20 text-white placeholder-white/50 rounded-lg py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-white/30"
+              className="w-full bg-white/20 text-white placeholder-white/50 rounded-lg py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
             <button className="absolute right-0 top-0 h-full px-4 text-white hover:text-white/80 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

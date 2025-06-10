@@ -1,9 +1,13 @@
+"use client"
+
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 import Sidebar from './components/sidebar'
 import ChatArea from './components/chatarea'
 
-const page = () => {
+const Page = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   return (
     <div className="relative w-screen h-screen">
       <Image 
@@ -13,10 +17,10 @@ const page = () => {
         className="object-cover"
         priority
       />
-      <Sidebar />
-      <ChatArea />
+      <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <ChatArea isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
     </div>
   )
 }
 
-export default page
+export default Page
