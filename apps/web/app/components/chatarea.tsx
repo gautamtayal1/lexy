@@ -4,10 +4,7 @@ import React, { useState } from 'react';
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@repo/db/convex/_generated/api";
 import { ArrowBigUp, FileUp, Menu } from "lucide-react";
-import { useCurrentUser } from '../useCurrentUser';
-import { createTRPCClient, httpBatchLink } from '@trpc/client'
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { streamText } from "ai"
+import { useUser } from '@clerk/nextjs';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -15,30 +12,57 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
+  const { user } = useUser();
   const [message, setMessage] = useState('');
-  // const { isLoading, isAuthenticated } = useCurrentUser();
-  // const messages = useQuery(api.messages.list);
-  const sendMessage = useMutation(api.messages.send);
+  const sendMessage = useMutation(api.messages.addMessage);
   const [reply, setReply] = useState('');
+  const [model, setModel] = useState('deepseek/deepseek-r1-0528-qwen3-8b:free');
 
-  // const trpc = createTRPCClient({
-  //   links: [
-  //     httpBatchLink({
-  //       url: "http://localhost:8080"
-  //     })
-  //   ]
-  // })
-  const openrouter = createOpenRouter({
-    apiKey: "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"
+
+  const history = useQuery(api.messages.listMessages, {
+    threadId: "demo thread",
   })
 
-  const handleSendMessage = async(message: string) => {
-    const result = streamText({
-      model: openrouter.chat("deepseek/deepseek-r1-0528-qwen3-8b:free"),
-      prompt: message
-    })
-    for await (const chunk of result.textStream) {
-      setReply(prev => prev + chunk)
+  const handleSendMessage = async (userInput: string) => {
+    setReply("");
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user?.id,
+        threadId: "demo thread",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant that can answer questions and help with tasks.",
+          },
+          ...(history?.map((m) => ({ role: m.role, content: m.content })) ?? []),
+          { role: "user", content: userInput },
+        ],
+        model,
+        modelParams: {
+          temperature: 0.7,
+          reasoning: "medium",
+        },
+      }),
+    });
+
+    if (!response.ok || !response.body) {
+      console.error("Failed to fetch stream");
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedText = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      accumulatedText += decoder.decode(value, { stream: true });
+      setReply(accumulatedText);
     }
   }
 
@@ -73,7 +97,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-[90%] max-w-3xl">
         <div className=" backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-4">
           <div className="flex items-center gap-4 mb-4">
-            <select className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30">
+            <select 
+              className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
+              onChange={(e) => setModel(e.target.value)}
+            >
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-3.5">GPT-3.5</option>
               <option value="claude">Claude</option>

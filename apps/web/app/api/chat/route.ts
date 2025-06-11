@@ -1,6 +1,6 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { streamText } from "ai";
+import { streamText, CoreMessage } from "ai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 
@@ -18,22 +18,63 @@ export async function POST(request: NextRequest) {
     messages,
     threadId,
     model,
-    reasoning,
     modelParams,
+  }: {
+    userId: string;
+    messages: CoreMessage[];
+    threadId: string;
+    model: string;
+    modelParams: any;
   } = await request.json();
 
-  const result = streamText({
-    model: openrouter.chat("deepseek/deepseek-r1-0528-qwen3-8b:free"),
-    prompt: messages.map((message: any) => `${message.role}: ${message.content}`).join("\n"),
+  if (!messages || messages.length === 0) {
+    return new Response("messages are required", { status: 400 });
+  }
+  console.log("check1")
+
+  const threadInternalId = await convex.mutation(api.threads.ensureThread, {
+    userId,
+    threadId,
+    model,
+    title: "sample thread",
+  });
+  console.log("check2")
+  
+  const userMessageId = crypto.randomUUID();
+  const last = messages[messages.length - 1]!
+  await convex.mutation(api.messages.addMessage, {
+    userId,
+    threadId: threadInternalId as string,
+    role: "user",
+    content: last.content as string,
+    model,
+    status: "completed",
+    modelParams,
+    messageId: userMessageId,
   })
 
-  for await (const chunk of result.textStream) {
-    console.log(chunk);
-  }
+  console.log("check3")
 
-  return new Response(result.textStream, {
+  const assistantMessageId = crypto.randomUUID();
+  await convex.mutation(api.messages.addMessage, {
+    userId,
+    threadId: threadInternalId as string,
+    messageId: assistantMessageId,
+    role: "assistant",
+    content: "",
+    model,
+    status: "thinking",
+    modelParams,
+  })
+  console.log("check4")
+  const result = await streamText({
+    model: openrouter.chat(model),
+    messages,
+  })
+  console.log("check5")
+  return new NextResponse(result.textStream, {
     headers: {
-      "Content-Type": "text/event-stream",
-    },
-  });
+      "Content-Type": "text/plain; charset=utf-8",
+    }
+  })
 }

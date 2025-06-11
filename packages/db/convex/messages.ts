@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { MessageStatusValidator } from "./schema";
 
@@ -6,6 +6,7 @@ export const addMessage = mutation({
   args: {
     userId: v.string(),
     threadId: v.string(),
+    messageId: v.string(),
     role: v.union(
       v.literal("user"),
       v.literal("assistant"),
@@ -54,3 +55,15 @@ export const patchMessage = mutation({
     });
   },
 });
+
+export const listMessages = query({
+  args: {
+    threadId: v.string(),
+  },
+  handler: async (ctx, { threadId }) => {
+    return await ctx.db
+      .query("messages")
+      .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
+      .collect();
+  }
+})

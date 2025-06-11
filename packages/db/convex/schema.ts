@@ -26,8 +26,8 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-  .index("byUserId", ["userId"]),
-  //todo: add index
+  .index("byUserId", ["userId"])
+  .index("byThreadId", ["threadId"]),
 
   users: defineTable({
     name: v.string(),
