@@ -1,7 +1,7 @@
 "use client"
 
-import React from 'react';
-import { ArrowBigUp, FileUp, Menu } from "lucide-react";
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowBigUp, FileUp, Menu, ChevronDown, ChevronUp } from "lucide-react";
 import { useChat } from '@ai-sdk/react';
 
 interface ChatAreaProps {
@@ -10,6 +10,9 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
+  const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
+  const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-r1-0528-qwen3-8b:free");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
     messages,
@@ -19,9 +22,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   } = useChat({
     api: "/api/chat",
     experimental_throttle: 50,
-    
     body: {
-      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      model: selectedModel,
       userId: "123",
       threadId: "demo thread",
       modelParams: {
@@ -29,6 +31,28 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       },
     }
   })
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === 'user') {
+      scrollToBottom();
+    }
+  }, [messages]);
+
+  const toggleReasoning = (messageId: string) => {
+    setExpandedReasonings(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedModel(e.target.value);
+  };
 
   return (
     <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
@@ -42,55 +66,86 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <div className="w-[90%] max-w-3xl mx-auto space-y-6 py-6">
+        <div className="w-[95%] max-w-4xl mx-auto space-y-8 py-8">
           {messages.map(message => (
-            <div 
-              key={message.id} 
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+            <div key={message.id} className="space-y-3">
+              {message.role === 'assistant' && message.reasoning && (
+                <div className="mb-3">
+                  <button
+                    onClick={() => toggleReasoning(message.id)}
+                    className="flex items-center gap-2 text-white/70 hover:text-white text-base transition-colors"
+                  >
+                    {expandedReasonings[message.id] ? (
+                      <ChevronUp className="h-5 w-5" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5" />
+                    )}
+                    Show Reasoning
+                  </button>
+                  {expandedReasonings[message.id] && (
+                    <div className="mt-3 p-4 bg-white/5 rounded-lg text-white/80 text-base leading-relaxed">
+                      {message.reasoning}
+                    </div>
+                  )}
+                </div>
+              )}
               <div 
-                className={`rounded-2xl px-4 py-2 text-white ${
-                  message.role === 'user' 
-                    ? 'bg-white/10 max-w-[70%]' 
-                    : 'w-full'
-                }`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {message.content}
+                <div 
+                  className={`rounded-2xl px-6 py-3 text-white text-base leading-relaxed ${
+                    message.role === 'user' 
+                      ? 'bg-white/10 max-w-[70%]' 
+                      : 'w-full'
+                  }`}
+                >
+                  {message.content}
+                </div>
               </div>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <div className="w-[90%] max-w-3xl mx-auto mb-8">
-        <div className="backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-4">
-          <div className="flex items-center gap-4 mb-4">
-            <select 
-              className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
-            >
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-3.5">GPT-3.5</option>
-              <option value="claude">Claude</option>
-            </select>
-            <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
-              <FileUp className="h-4 w-4" />    
-              Attach PDF
-            </button>
-          </div>
-
-          <div className="relative">
+      <div className="w-[95%] max-w-4xl mx-auto mb-6">
+        <div className="backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-3">
+          <div className="relative mb-4">
             <input
               type="text"
               value={input}
               onChange={handleInputChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
               placeholder="Type your message..."
-              className="w-full text-white placeholder-white/50 rounded-xl py-3 px-4 pr-12 focus:outline-none"
+              className="w-full text-white placeholder-white/50 rounded-xl py-4 px-5 pr-14 text-base focus:outline-none"
             />
             <button  
-              className="absolute right-0 top-0 h-full px-4 text-white hover:text-white/80 transition-colors" 
+              className="absolute right-0 top-0 h-full px-5 text-white hover:text-white/80 transition-colors" 
               onClick={handleSubmit}
             >
-              <ArrowBigUp className="h-5 w-5" />
+              <ArrowBigUp className="h-6 w-6" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <select 
+              value={selectedModel}
+              onChange={handleModelChange}
+              className="text-white rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <option value="deepseek/deepseek-r1-0528-qwen3-8b:free">DeepSeek</option>
+              <option value="gpt-4  ">GPT-4</option>
+              <option value="gpt-3.5">GPT-3.5</option>
+              <option value="claude">Claude</option>
+            </select>
+            <button className="text-white rounded-lg px-4 py-2 text-base flex items-center gap-2 transition-colors">
+              <FileUp className="h-5 w-5" />    
+              Attach PDF
             </button>
           </div>
         </div>

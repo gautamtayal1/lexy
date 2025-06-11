@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     })
 
     const result = await streamText({
-      model: openrouter.chat("deepseek/deepseek-r1-0528-qwen3-8b:free"),
+      model: openrouter.chat("gpt-4o-mini"),
       system: "you are a helpful assistant",
       messages,
     })
