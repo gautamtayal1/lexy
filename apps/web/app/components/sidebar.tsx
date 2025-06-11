@@ -76,9 +76,6 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
           </div>
         </div>
       </Authenticated>
-      <div className="p-4">
-        <UserButton />
-      </div>
     </div>
   );
 };
