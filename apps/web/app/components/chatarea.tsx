@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowBigUp, FileUp, Menu, ChevronDown, ChevronUp } from "lucide-react";
 import { useChat } from '@ai-sdk/react';
+import { useUser } from '@clerk/nextjs';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -13,6 +14,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
   const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-r1-0528-qwen3-8b:free");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
 
   const {
     messages,
@@ -24,7 +26,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     experimental_throttle: 50,
     body: {
       model: selectedModel,
-      userId: "123",
+      userId: user?.id,
       threadId: "demo thread",
       modelParams: {
         temperature: 0.5,

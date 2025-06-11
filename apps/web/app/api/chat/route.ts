@@ -4,6 +4,7 @@ import { streamText } from "ai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 import { openai } from "@ai-sdk/openai";
+import { createGroq } from "@ai-sdk/groq";
 
 export const runtime = "edge";
 
@@ -11,6 +12,10 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY!,
+})
+
+const groq = createGroq({
+  apiKey: process.env.GROQ_API_KEY!,
 })
 
 export async function POST(request: NextRequest) {
@@ -66,7 +71,7 @@ export async function POST(request: NextRequest) {
     })
 
     const result = await streamText({
-      model: openrouter.chat("gpt-4o-mini"),
+      model: groq("deepseek-r1-distill-llama-70b"),
       system: "you are a helpful assistant",
       messages,
     })
