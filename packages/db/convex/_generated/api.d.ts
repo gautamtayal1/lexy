@@ -16,6 +16,7 @@ import type {
 import type * as chat from "../chat.js";
 import type * as http from "../http.js";
 import type * as messages from "../messages.js";
+import type * as threads from "../threads.js";
 import type * as users from "../users.js";
 
 /**
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   http: typeof http;
   messages: typeof messages;
+  threads: typeof threads;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
