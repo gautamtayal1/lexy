@@ -39,8 +39,7 @@ export default defineSchema({
     messageId: v.string(),
     threadId: v.string(),
     attachmentIds: v.array(v.string()), //todo: add attachment table
-    
-    reasoning: v.boolean(),
+
     content: v.string(),
     model: v.string(),
     status: MessageStatusValidator,

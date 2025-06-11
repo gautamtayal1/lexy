@@ -1,29 +1,56 @@
+import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import { getCurrentUserOrThrow } from "./users";
-import { Id } from "./_generated/dataModel";
+import { MessageStatusValidator } from "./schema";
 
-export const send = mutation({
-  args: { body: v.string() },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUserOrThrow(ctx);
-    await ctx.db.insert("messages", { body: args.body, userId: user._id });
+export const addMessage = mutation({
+  args: {
+    userId: v.string(),
+    threadId: v.string(),
+    role: v.union(
+      v.literal("user"),
+      v.literal("assistant"),
+      v.literal("system")
+    ),
+    content: v.string(),
+    model: v.string(),
+    status: MessageStatusValidator,
+    modelParams: v.optional(
+      v.object({
+        temperature: v.number(),
+        topP: v.optional(v.number()),
+        topK: v.optional(v.number()),
+        reasoning: v.optional(v.union(v.literal("low"), v.literal("medium"), v.literal("high"))),
+      })
+    ),
   },
-});
+  handler: async(ctx, args) => {
+    await ctx.db.insert("messages", {
+      ...args,
+      messageId: crypto.randomUUID(),
+      attachmentIds: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    })
+  }
+})
 
-export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    const messages = await ctx.db.query("messages").collect();
-    return Promise.all(
-      messages.map(async (message) => {
-          
-        const user = await ctx.db.get(message.userId as Id<"users">);
-        return {
-          author: user?.name ?? "Anonymous",
-          ...message,
-        };
-      }),
-    );
+export const patchMessage = mutation({
+  args: {
+    messageId: v.string(),
+    content: v.optional(v.string()),
+    status: v.optional(MessageStatusValidator),
+    modelResponse: v.optional(v.string()),
+  },
+  handler: async (ctx, { messageId, ...patch }) => {
+    const msg = await ctx.db
+      .query("messages")
+      .filter((q) => q.eq(q.field("messageId"), messageId))
+      .unique();
+    if (!msg) throw new Error("message not found");
+
+    await ctx.db.patch(msg._id, {
+      ...patch,
+      updatedAt: Date.now(),
+    });
   },
 });
