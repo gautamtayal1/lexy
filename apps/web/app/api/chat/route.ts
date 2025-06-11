@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { streamText, CoreMessage } from "ai";
+import { streamText } from "ai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
+import { openai } from "@ai-sdk/openai";
 
 export const runtime = "edge";
 
@@ -13,68 +14,68 @@ const openrouter = createOpenRouter({
 })
 
 export async function POST(request: NextRequest) {
-  const { 
-    userId,
-    messages,
-    threadId,
-    model,
-    modelParams,
-  }: {
-    userId: string;
-    messages: CoreMessage[];
-    threadId: string;
-    model: string;
-    modelParams: any;
-  } = await request.json();
+  try {
+    const { 
+      userId,
+      messages,
+      threadId,
+      model,
+      modelParams,
+    }: {
+      userId: string;
+      messages: any[];
+      threadId: string;
+      model: string;
+      modelParams: any;
+    } = await request.json();
 
-  if (!messages || messages.length === 0) {
-    return new Response("messages are required", { status: 400 });
-  }
-  console.log("check1")
-
-  const threadInternalId = await convex.mutation(api.threads.ensureThread, {
-    userId,
-    threadId,
-    model,
-    title: "sample thread",
-  });
-  console.log("check2")
-  
-  const userMessageId = crypto.randomUUID();
-  const last = messages[messages.length - 1]!
-  await convex.mutation(api.messages.addMessage, {
-    userId,
-    threadId: threadInternalId as string,
-    role: "user",
-    content: last.content as string,
-    model,
-    status: "completed",
-    modelParams,
-    messageId: userMessageId,
-  })
-
-  console.log("check3")
-
-  const assistantMessageId = crypto.randomUUID();
-  await convex.mutation(api.messages.addMessage, {
-    userId,
-    threadId: threadInternalId as string,
-    messageId: assistantMessageId,
-    role: "assistant",
-    content: "",
-    model,
-    status: "thinking",
-    modelParams,
-  })
-  console.log("check4")
-  const result = await streamText({
-    model: openrouter.chat(model),
-    messages,
-  })
-  console.log("check5")
-  return new NextResponse(result.textStream, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
+    if (!messages || messages.length === 0) {
+      return new Response("messages are required", { status: 400 });
     }
-  })
+
+    const threadInternalId = await convex.mutation(api.threads.ensureThread, {
+      userId,
+      threadId,
+      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      title: "sample thread",
+    });
+    
+    const userMessageId = crypto.randomUUID();
+    const last = messages[messages.length - 1]!
+    await convex.mutation(api.messages.addMessage, {
+      userId,
+      threadId: threadInternalId as string,
+      role: "user",
+      content: last.content as string,
+      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      status: "completed",
+      modelParams,
+      messageId: userMessageId,
+    })
+
+    const assistantMessageId = crypto.randomUUID();
+    await convex.mutation(api.messages.addMessage, {
+      userId,
+      threadId: threadInternalId as string,
+      messageId: assistantMessageId,
+      role: "assistant",
+      content: "",
+      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      status: "thinking",
+      modelParams,
+    })
+
+    const result = await streamText({
+      model: openrouter.chat("deepseek/deepseek-r1-0528-qwen3-8b:free"),
+      system: "you are a helpful assistant",
+      messages,
+    })
+    return result.toDataStreamResponse({
+      sendReasoning: true,
+      sendSources: true,
+    })
+  } catch (error) {
+    console.error("Error in chat route:", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }

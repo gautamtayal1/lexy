@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@repo/db/convex/_generated/api";
 import { ArrowBigUp, FileUp, Menu } from "lucide-react";
 import { useUser } from '@clerk/nextjs';
+import { Message, useChat } from '@ai-sdk/react';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -12,63 +13,30 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
-  const { user } = useUser();
-  const [message, setMessage] = useState('');
-  const sendMessage = useMutation(api.messages.addMessage);
-  const [reply, setReply] = useState('');
-  const [model, setModel] = useState('deepseek/deepseek-r1-0528-qwen3-8b:free');
 
-
-  const history = useQuery(api.messages.listMessages, {
-    threadId: "demo thread",
-  })
-
-  const handleSendMessage = async (userInput: string) => {
-    setReply("");
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    status,
+    setMessages,
+  } = useChat({
+    api: "/api/chat",
+    experimental_throttle: 50,
+    
+    body: {
+      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      userId: "123",
+      threadId: "demo thread",
+      modelParams: {
+        temperature: 0.5,
       },
-      body: JSON.stringify({
-        userId: user?.id,
-        threadId: "demo thread",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant that can answer questions and help with tasks.",
-          },
-          ...(history?.map((m) => ({ role: m.role, content: m.content })) ?? []),
-          { role: "user", content: userInput },
-        ],
-        model,
-        modelParams: {
-          temperature: 0.7,
-          reasoning: "medium",
-        },
-      }),
-    });
-
-    if (!response.ok || !response.body) {
-      console.error("Failed to fetch stream");
-      return;
     }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let accumulatedText = "";
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      accumulatedText += decoder.decode(value, { stream: true });
-      setReply(accumulatedText);
-    }
-  }
+  })
 
   return (
     <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow-lg rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
-      {/* Toggle Sidebar Button - Only visible when sidebar is closed */}
       {!isSidebarOpen && (
         <button 
           onClick={onToggleSidebar}
@@ -78,7 +46,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
         </button>
       )}
 
-      {/* Chat Messages Area */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-[80%] mx-auto space-y-6">
           <div className="flex flex-col space-y-4">
@@ -88,7 +55,12 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
               </div>
             ))} */}
             <div className="text-white">
-              {reply}
+              {messages.map(message => (
+              <div key={message.id}>
+                {message.role === 'user' ? 'User: ' : 'AI: '}
+                {message.content}
+              </div>
+            ))}
             </div>
           </div>
         </div>
@@ -99,7 +71,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
           <div className="flex items-center gap-4 mb-4">
             <select 
               className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
-              onChange={(e) => setModel(e.target.value)}
+              // onChange={(e) => setModel(e.target.value)}
             >
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-3.5">GPT-3.5</option>
@@ -115,19 +87,14 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
           <div className="relative">
             <input
               type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={input}
+              onChange={handleInputChange}
               placeholder="Type your message..."
               className="w-full text-white placeholder-white/50 rounded-xl py-3 px-4 pr-12 focus:outline-none"
             />
-            <button 
+            <button  
               className="absolute right-0 top-0 h-full px-4 text-white hover:text-white/80 transition-colors" 
-              onClick={() => {
-                if (message) {
-                  handleSendMessage(message)
-                }
-                setMessage('')
-              }}
+              onClick={handleSubmit}
             >
               <ArrowBigUp className="h-5 w-5" />
             </button>
