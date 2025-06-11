@@ -1,11 +1,8 @@
 "use client"
 
-import React, { useMemo, useState } from 'react';
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@repo/db/convex/_generated/api";
+import React from 'react';
 import { ArrowBigUp, FileUp, Menu } from "lucide-react";
-import { useUser } from '@clerk/nextjs';
-import { Message, useChat } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -19,8 +16,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     input,
     handleInputChange,
     handleSubmit,
-    status,
-    setMessages,
   } = useChat({
     api: "/api/chat",
     experimental_throttle: 50,
@@ -36,7 +31,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   })
 
   return (
-    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow-lg rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
       {!isSidebarOpen && (
         <button 
           onClick={onToggleSidebar}
@@ -46,44 +41,43 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
         </button>
       )}
 
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-[80%] mx-auto space-y-6">
-          <div className="flex flex-col space-y-4">
-            {/* {messages?.map(({ _id, user, body }) => (
-              <div key={_id} className="bg-white/20 p-4 rounded-lg max-w-[80%] self-start">
-                {user}: {body}
-              </div>
-            ))} */}
-            <div className="text-white">
-              {messages.map(message => (
-              <div key={message.id}>
-                {message.role === 'user' ? 'User: ' : 'AI: '}
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-[90%] max-w-3xl mx-auto space-y-6 py-6">
+          {messages.map(message => (
+            <div 
+              key={message.id} 
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div 
+                className={`rounded-2xl px-4 py-2 text-white ${
+                  message.role === 'user' 
+                    ? 'bg-white/10 max-w-[70%]' 
+                    : 'w-full'
+                }`}
+              >
                 {message.content}
               </div>
-            ))}
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-[90%] max-w-3xl">
-        <div className=" backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-4">
+      <div className="w-[90%] max-w-3xl mx-auto mb-8">
+        <div className="backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-4">
           <div className="flex items-center gap-4 mb-4">
             <select 
               className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
-              // onChange={(e) => setModel(e.target.value)}
             >
               <option value="gpt-4">GPT-4</option>
               <option value="gpt-3.5">GPT-3.5</option>
               <option value="claude">Claude</option>
             </select>
-            <button className=" text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
+            <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
               <FileUp className="h-4 w-4" />    
               Attach PDF
             </button>
           </div>
 
-          {/* Message Input */}
           <div className="relative">
             <input
               type="text"
