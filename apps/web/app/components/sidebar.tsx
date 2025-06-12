@@ -4,6 +4,7 @@ import React from 'react';
 import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
 import { Authenticated, Unauthenticated } from 'convex/react';
 import { MenuIcon, PlusIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,6 +13,11 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const { user } = useUser();
+  const router = useRouter();
+
+  const handleNewChat = () => {
+    router.push('/');
+  };
 
   return (
     <div className={`fixed top-8 h-[calc(100vh-4rem)] w-80 bg-white/5 backdrop-blur-xl shadow-lg rounded-2xl border border-white/10 flex flex-col transition-all duration-300 ${isOpen ? 'left-8' : '-left-80'}`}>
@@ -28,7 +34,10 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       </div>
 
       <div className="p-4">
-        <button className="w-full bg-white/30 hover:bg-white/40 text-white font-medium py-2 px-4 rounded-full transition-colors flex items-center justify-center gap-2">
+        <button 
+          onClick={handleNewChat}
+          className="w-full bg-white/30 hover:bg-white/40 text-white font-medium py-2 px-4 rounded-full transition-colors flex items-center justify-center gap-2"
+        >
           <PlusIcon className="w-4 h-4" />
           New Chat
         </button>

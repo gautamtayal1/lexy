@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ArrowBigUp, FileUp, Menu } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { useChatContext } from '../context/ChatContext';
 
 interface HomePageProps {
   isSidebarOpen: boolean;
@@ -12,19 +13,19 @@ interface HomePageProps {
 const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const [input, setInput] = useState("");
   const router = useRouter();
+  const { setQuestion } = useChatContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
+    setQuestion(input);
     const id = crypto.randomUUID();
-    localStorage.setItem('initialMessage', input);
     router.push(`/chat/${id}`);
   };
 
   const handleQuestionClick = (question: string) => {
     const id = crypto.randomUUID();
-    localStorage.setItem('initialMessage', question);
+    setQuestion(question);
     router.push(`/chat/${id}`);
   };
 

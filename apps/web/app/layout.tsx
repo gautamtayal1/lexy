@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "./ConvexProviderWithClerk";
+import { ChatProvider } from "./context/ChatContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,7 +22,9 @@ export default function RootLayout({
           signInUrl="/sign-in"
           signUpUrl="/sign-up"
         >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ChatProvider>
+            <ConvexClientProvider>{children}</ConvexClientProvider>
+          </ChatProvider>
         </ClerkProvider>
       </body>
     </html>

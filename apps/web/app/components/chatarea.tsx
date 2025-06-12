@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ArrowBigUp, FileUp, Menu, ChevronDown, ChevronUp } from "lucide-react";
 import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
+import { usePathname } from 'next/navigation';
+import { useChatContext } from '../context/ChatContext';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -16,8 +18,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
-  const [initialMessage, setInitialMessage] = useState("");
-
+  const pathname = usePathname();
+  const { question } = useChatContext();
   const {
     messages,
     input,
@@ -30,7 +32,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     body: {
       model: selectedModel,
       userId: user?.id,
-      threadId: "demo thread",
+      threadId: pathname.split('/')[2],
       modelParams: {
         temperature: 0.5,
       },
@@ -39,14 +41,12 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
 
   useEffect(() => {
     if (!isInitialized) {
-      const initialMessage = localStorage.getItem('initialMessage');
-      if (initialMessage) {
-        append({ role: 'user', content: initialMessage });
-        localStorage.removeItem('initialMessage');
+      if (question) {
+        append({ role: 'user', content: question });
         setIsInitialized(true);
       }
     }
-  }, [isInitialized, append]);
+  }, [isInitialized, append, question]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
