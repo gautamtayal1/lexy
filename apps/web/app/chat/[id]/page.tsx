@@ -2,12 +2,11 @@
 
 import Image from 'next/image'
 import React, { useState } from 'react'
-import Sidebar from './components/Sidebar'
-import HomePage from './components/HomePage'
+import Sidebar from "../../components/Sidebar"
+import ChatArea from "../../components/ChatArea"
 
 const Page = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  // const tasks = useQuery(api.tasks.get);
   return (
     <div className="relative w-screen h-screen">
       <Image 
@@ -18,7 +17,7 @@ const Page = () => {
         priority
       />
       <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <HomePage isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <ChatArea isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
     </div>
   )
 }

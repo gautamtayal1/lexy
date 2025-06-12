@@ -15,6 +15,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-r1-0528-qwen3-8b:free");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [localInput, setLocalInput] = useState("");
 
   const {
     messages,
@@ -33,6 +35,18 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       },
     }
   })
+
+  useEffect(() => {
+    if (!isInitialized) {
+      const initialMessage = localStorage.getItem('initialMessage');
+      if (initialMessage) {
+        handleInputChange({ target: { value: initialMessage } } as React.ChangeEvent<HTMLInputElement>);
+        handleSubmit(new Event('submit') as any);
+        localStorage.removeItem('initialMessage');
+        setIsInitialized(true);
+      }
+    }
+  }, [isInitialized, handleInputChange, handleSubmit]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,6 +68,19 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
 
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedModel(e.target.value);
+  };
+
+  const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalInput(e.target.value);
+  };
+
+  const handleLocalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!localInput.trim()) return;
+    
+    handleInputChange({ target: { value: localInput } } as React.ChangeEvent<HTMLInputElement>);
+    handleSubmit(e);
+    setLocalInput("");
   };
 
   return (

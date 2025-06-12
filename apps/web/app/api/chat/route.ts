@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     })
 
     const result = await streamText({
-      model: groq("deepseek-r1-distill-llama-70b"),
+      model: openrouter.chat("gpt-4.1-2025-04-14"),
       system: "you are a helpful assistant",
       messages,
     })
