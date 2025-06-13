@@ -10,7 +10,7 @@ const Page = () => {
   return (
     <div className="relative w-screen h-screen">
       <Image 
-        src="/new.jpg" 
+        src="/neww.jpg" 
         alt="background" 
         fill
         className="object-cover"

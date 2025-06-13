@@ -11,6 +11,7 @@ import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
 import { UploadButton } from '../utils/uploadthing';
 import MessageFormatter from './MessageFormatter';
+import ModelDropdown from './ModelDropdown';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -140,11 +141,11 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <div className="w-[95%] max-w-4xl mx-auto space-y-8 py-8">
+        <div className="w-[95%] max-w-4xl mx-auto py-8">
           {messages ? messages.map(message => (
-            <div key={message.id} className="space-y-3">
+            <div key={message.id} className="space-y-2">
               {message.role === 'assistant' && message.reasoning && (
-                <div className="mb-3">
+                <div className="mb-2">
                   <button
                     onClick={() => toggleReasoning(message.id)}
                     className="flex items-center gap-2 text-white/70 hover:text-white text-base transition-colors"
@@ -202,8 +203,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
         </div>
       </div>
 
-      <div className="w-[95%] max-w-4xl mx-auto">
-        <div className="backdrop-blur-2xl rounded-t-3xl shadow-2xl border border-white/20 p-2 border-b-0">
+      <div className="w-[95%] max-w-4xl mx-auto mb-6">
+        <div className="backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-2">
           <div className="relative mb-2">
             <textarea
               value={input}
@@ -231,16 +232,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <select 
-              value={selectedModel}
-              onChange={handleModelChange}
-              className="text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
-            >
-              <option value="groq/llama-3.1-8b-instant">Groq llama</option>
-              <option value="openai/gpt-4o">GPT-4</option>
-              <option value="openai/gpt-3.5-turbo">GPT-3.5</option>
-              <option value="anthropic/claude-3-5-sonnet-20240620">Claude</option>
-            </select>
+            <ModelDropdown selectedModel={selectedModel} onModelChange={setSelectedModel} />
             <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
               {/* <FileUp className="h-4 w-4" />    
               <UploadButton
