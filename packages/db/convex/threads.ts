@@ -34,3 +34,24 @@ export const ensureThread = mutation({
     }
   },
 })
+
+export const updateTitle = mutation({
+  args: {
+    userId: v.string(),
+    threadId: v.string(),
+    title: v.string(),
+  },
+  handler: async(ctx, { userId, threadId, title }) => {
+    const thread = await ctx.db
+      .query("threads")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("threadId"), threadId))
+      .unique();
+
+    if (thread) {
+      await ctx.db.patch(thread._id, {
+        title,
+      });
+    }
+  },
+})

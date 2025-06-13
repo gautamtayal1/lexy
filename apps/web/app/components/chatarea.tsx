@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -6,6 +7,7 @@ import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useChatContext } from '../context/ChatContext';
+import axios from 'axios';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -13,6 +15,7 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
+
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
   const [selectedModel, setSelectedModel] = useState("groq/llama-3.1-8b-instant");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -20,19 +23,20 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
   const { question } = useChatContext();
+  const threadId = pathname.split('/')[2];
+
   const {
     messages,
     input,
     handleInputChange,
     handleSubmit,
     append,
-    setInput
   } = useChat({
     api: "/api/chat",
     body: {
       model: selectedModel,
       userId: user?.id,
-      threadId: pathname.split('/')[2],
+      threadId,
       modelParams: {
         temperature: 0.5,
       },
@@ -44,6 +48,15 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     if (!isInitialized) {
       if (question) {
         append({ role: 'user', content: question })
+
+        const setThreadTitle = async () => {
+          await axios.post("/api/thread/title", {
+            threadId,
+            userId: user?.id,
+            question
+          })
+        }
+        setThreadTitle();
         setIsInitialized(true);
       }
     }

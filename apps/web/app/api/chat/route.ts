@@ -3,7 +3,6 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText } from "ai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
-import { openai } from "@ai-sdk/openai";
 import { createGroq } from "@ai-sdk/groq";
 
 export const runtime = "edge";
