@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   await convex.mutation(api.threads.updateTitle, {
     userId,
     threadId,
-    title: text.split("Title:")[1]!.trim() || "New Chat",
+    title: text.split("Title:")[1]?.trim() || "New Chat",
   });
 
   return NextResponse.json({ message: "Thread title set" });

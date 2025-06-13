@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     const last = messages[messages.length - 1]!
     await convex.mutation(api.messages.addMessage, {
       userId,
-      threadId: threadInternalId as string,
+      threadId,
       role: "user",
       content: last.content as string,
       model: "deepseek/deepseek-r1-0528-qwen3-8b:free",

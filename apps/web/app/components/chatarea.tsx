@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -8,6 +7,8 @@ import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useChatContext } from '../context/ChatContext';
 import axios from 'axios';
+import { useQuery } from 'convex/react';
+import { api } from '@repo/db/convex/_generated/api';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -15,15 +16,25 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
-
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
   const [selectedModel, setSelectedModel] = useState("groq/llama-3.1-8b-instant");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
-  const { question } = useChatContext();
+  const { question, setQuestion } = useChatContext();
   const threadId = pathname.split('/')[2];
+
+  const isThreadExists = 
+  useQuery(api.threads.isThreadExists, {
+    userId: user?.id || "",
+    threadId: threadId!,
+  });
+  
+  const storedMessages = 
+  useQuery(api.messages.listMessages, {
+    threadId: threadId!,
+  });
 
   const {
     messages,
@@ -31,6 +42,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     handleInputChange,
     handleSubmit,
     append,
+    setMessages,
   } = useChat({
     api: "/api/chat",
     body: {
@@ -42,6 +54,39 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       },
     }
   })
+
+  const [hasHydratedHistory, setHasHydratedHistory] = useState(false);
+
+  /**
+   * Whenever Convex returns the stored messages for the current thread we
+   * transform them into the shape expected by `useChat` (UIMessage[]) and push
+   * them into the chat state with the `setMessages` helper. After the first
+   * hydration we flip `hasHydratedHistory` so we do not duplicate messages on
+   * subsequent realtime updates coming from Convex.
+   */
+  useEffect(() => {
+    if (storedMessages) {
+      console.log('Stored messages:', storedMessages);
+      console.log(threadId)
+      console.log('User ID:', user?.id);
+      const ordered = [...storedMessages].sort(
+        (a, b) => a.createdAt - b.createdAt
+      );
+
+      // Map Convex schema to `useChat` UIMessage schema
+      const history = ordered.map((m) => ({
+        id: m.messageId,
+        role: m.role as 'user' | 'assistant' | 'system',
+        content: m.content,
+        createdAt: new Date(m.createdAt),
+        // Preserve reasoning if we have it
+        reasoning: (m as any).modelResponse || undefined,
+      }));
+
+      setMessages(history);
+      setHasHydratedHistory(true);
+    }
+  }, [hasHydratedHistory, storedMessages, setMessages]);
 
   useEffect(() => {
     console.log('ChatArea useEffect running:', { isInitialized, question });
@@ -58,6 +103,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
         }
         setThreadTitle();
         setIsInitialized(true);
+        setQuestion("");
       }
     }
   }, [isInitialized, question]);
@@ -97,7 +143,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
 
       <div className="flex-1 overflow-y-auto">
         <div className="w-[95%] max-w-4xl mx-auto space-y-8 py-8">
-          {messages.map(message => (
+          {messages ? messages.map(message => (
             <div key={message.id} className="space-y-3">
               {message.role === 'assistant' && message.reasoning && (
                 <div className="mb-3">
@@ -129,6 +175,14 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
                       : 'w-full'
                   }`}
                 >
+                  {message.content}
+                </div>
+              </div>
+            </div>
+          )) : storedMessages?.map(message => (
+            <div key={message.messageId} className="space-y-3">
+              <div className="flex justify-start">
+                <div className="rounded-2xl px-6 py-3 text-white text-base leading-relaxed bg-white/10 max-w-[70%]">
                   {message.content}
                 </div>
               </div>

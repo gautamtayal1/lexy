@@ -48,11 +48,16 @@ export const updateTitle = mutation({
       .filter((q) => q.eq(q.field("threadId"), threadId))
       .unique();
 
-    if (thread) {
-      await ctx.db.patch(thread._id, {
-        title,
-      });
+    if (!thread) {
+      throw new Error("Thread not found");
     }
+
+    await ctx.db.patch(thread._id, {
+      title,
+      updatedAt: Date.now(),
+    });
+
+    return thread._id;
   },
 })
 
@@ -67,5 +72,21 @@ export const getThread = query({
       .collect();
 
     return threads;
+  },
+})
+
+export const isThreadExists = query({
+  args: {
+    userId: v.string(),
+    threadId: v.string(),
+  },
+  handler: async(ctx, { userId, threadId }) => {
+    const thread = await ctx.db
+      .query("threads")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("threadId"), threadId))
+      .unique();
+
+    return !!thread;
   },
 })

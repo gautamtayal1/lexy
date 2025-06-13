@@ -29,6 +29,13 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
     router.push(`/chat/${id}`);
   };
 
+  const suggestedQuestions = [
+    "What are the key differences between React and Vue.js?",
+    "How can I implement authentication in a Next.js application?",
+    "What are the best practices for state management in React?",
+    "How do I optimize performance in a React application?"
+  ];
+
   return (
     <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
       {!isSidebarOpen && (
@@ -43,30 +50,15 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
       <div className="flex-1 overflow-y-auto">
         <div className="w-[95%] max-w-4xl mx-auto space-y-8 py-8">
           <div className="h-full flex flex-col items-center justify-center space-y-6">
-            <h2 
-              onClick={() => handleQuestionClick("What would you like to know about?")}
-              className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
-            >
-              What would you like to know about?
-            </h2>
-            <h2 
-              onClick={() => handleQuestionClick("How can I help you today?")}
-              className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
-            >
-              How can I help you today?
-            </h2>
-            <h2 
-              onClick={() => handleQuestionClick("What's on your mind?")}
-              className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
-            >
-              What's on your mind?
-            </h2>
-            <h2 
-              onClick={() => handleQuestionClick("What can I assist you with?")}
-              className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
-            >
-              What can I assist you with?
-            </h2>
+            {suggestedQuestions.map((question, index) => (
+              <h2 
+                key={index}
+                onClick={() => handleQuestionClick(question)}
+                className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
+              >
+                {question}
+              </h2>
+            ))}
           </div>
         </div>
       </div>
