@@ -9,7 +9,7 @@ import { useChatContext } from '../context/ChatContext';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
-import { UploadButton, UploadDropzone } from '../utils/uploadthing1';
+import { UploadButton } from '../utils/uploadthing';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -230,9 +230,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
             </select>
             <button className="text-white rounded-lg px-4 py-2 text-base flex items-center gap-2 transition-colors">
               <FileUp className="h-5 w-5" />    
-              Attach PDF
-            </button>
-            <UploadButton
+              <UploadButton
               endpoint="imageUploader"
               onClientUploadComplete={(res) => {
                 setFile(res[0]);
@@ -244,6 +242,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
                 alert(`ERROR! ${error.message}`);
               }}
             />
+            </button>
           </div>
         </div>
       </div>
