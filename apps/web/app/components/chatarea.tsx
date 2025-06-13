@@ -10,6 +10,7 @@ import axios from 'axios';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
 import { UploadButton } from '../utils/uploadthing';
+import MessageFormatter from './MessageFormatter';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -172,15 +173,27 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
                       : 'w-full'
                   }`}
                 >
-                  {message.content}
+                  {message.role === 'assistant' ? (
+                    <MessageFormatter content={message.content} />
+                  ) : (
+                    message.content
+                  )}
                 </div>
               </div>
             </div>
           )) : storedMessages?.map(message => (
             <div key={message.messageId} className="space-y-3">
-              <div className="flex justify-start">
-                <div className="rounded-2xl px-6 py-3 text-white text-base leading-relaxed bg-white/10 max-w-[70%]">
-                  {message.content}
+              <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`rounded-2xl px-6 py-3 text-white text-base leading-relaxed ${
+                  message.role === 'user' 
+                    ? 'bg-white/10 max-w-[70%]' 
+                    : 'w-full'
+                }`}>
+                  {message.role === 'assistant' ? (
+                    <MessageFormatter content={message.content} />
+                  ) : (
+                    message.content
+                  )}
                 </div>
               </div>
             </div>
