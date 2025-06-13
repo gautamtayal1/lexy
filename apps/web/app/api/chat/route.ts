@@ -75,6 +75,13 @@ export async function POST(request: NextRequest) {
       // model: openrouter.chat("gpt-4o"),
       system: "you are a helpful assistant",
       messages,
+      // async onChunk({chunk}) {
+      //   await convex.mutation(api.messages.patchMessage, {
+      //     messageId: assistantMessageId,
+      //     content: chunk.textDelta,
+      //     status: "completed",
+      //   });
+      // },
       async onFinish({ text }) {
         console.log('text', text)
         await convex.mutation(api.messages.patchMessage, {

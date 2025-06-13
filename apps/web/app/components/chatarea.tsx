@@ -195,8 +195,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
         <div className="backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-3">
           <div className="relative mb-4">
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={handleInputChange}
               onKeyDown={(e) => {
@@ -206,7 +205,9 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
                 }
               }}
               placeholder="Type your message..."
-              className="w-full text-white placeholder-white/50 rounded-xl py-4 px-5 pr-14 text-base focus:outline-none"
+              className="w-full text-white placeholder-white/50 rounded-xl py-4 px-5 pr-14 text-base focus:outline-none resize-none overflow-hidden"
+              rows={1}
+              style={{ minHeight: '56px' }}
             />
             <button  
               className="absolute right-0 top-0 h-full px-5 text-white hover:text-white/80 transition-colors" 
