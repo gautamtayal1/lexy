@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const threadInternalId = await convex.mutation(api.threads.ensureThread, {
       userId,
       threadId,
-      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      model,
       title: "sample thread",
     });
     
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       threadId,
       role: "user",
       content: last.content as string,
-      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      model,
       status: "completed",
       modelParams,
       messageId: userMessageId,
@@ -60,12 +60,12 @@ export async function POST(request: NextRequest) {
     const assistantMessageId = crypto.randomUUID();
     await convex.mutation(api.messages.addMessage, {
       userId,
-      threadId: threadInternalId as string,
+      threadId,
       messageId: assistantMessageId,
       role: "assistant",
       // Will be patched with the full text when the stream finishes.
       content: "",
-      model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+      model,
       status: "thinking",
       modelParams,
     })

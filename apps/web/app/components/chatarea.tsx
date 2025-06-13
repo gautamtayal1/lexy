@@ -222,7 +222,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
               onChange={handleModelChange}
               className="text-white rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-white/30"
             >
-              <option value="groq/llama-3.1-8b-instant">Groq</option>
+              <option value="groq/llama-3.1-8b-instant">Groq llama</option>
               <option value="openai/gpt-4o">GPT-4</option>
               <option value="openai/gpt-3.5-turbo">GPT-3.5</option>
               <option value="anthropic/claude-3-5-sonnet-20240620">Claude</option>
