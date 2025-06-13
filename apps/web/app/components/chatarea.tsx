@@ -14,7 +14,7 @@ interface ChatAreaProps {
 
 const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
-  const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-r1-0528-qwen3-8b:free");
+  const [selectedModel, setSelectedModel] = useState("groq/llama-3.1-8b-instant");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -25,10 +25,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     input,
     handleInputChange,
     handleSubmit,
-    append
+    append,
+    setInput
   } = useChat({
     api: "/api/chat",
-    experimental_throttle: 50,
     body: {
       model: selectedModel,
       userId: user?.id,
@@ -40,13 +40,14 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   })
 
   useEffect(() => {
+    console.log('ChatArea useEffect running:', { isInitialized, question });
     if (!isInitialized) {
       if (question) {
-        append({ role: 'user', content: question });
+        append({ role: 'user', content: question })
         setIsInitialized(true);
       }
     }
-  }, [isInitialized, append, question]);
+  }, [isInitialized, question]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -154,10 +155,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
               onChange={handleModelChange}
               className="text-white rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-white/30"
             >
-              <option value="deepseek/deepseek-r1-0528-qwen3-8b:free">DeepSeek</option>
-              <option value="gpt-4  ">GPT-4</option>
-              <option value="gpt-3.5">GPT-3.5</option>
-              <option value="claude">Claude</option>
+              <option value="groq/llama-3.1-8b-instant">Groq</option>
+              <option value="openai/gpt-4o">GPT-4</option>
+              <option value="openai/gpt-3.5-turbo">GPT-3.5</option>
+              <option value="anthropic/claude-3-5-sonnet-20240620">Claude</option>
             </select>
             <button className="text-white rounded-lg px-4 py-2 text-base flex items-center gap-2 transition-colors">
               <FileUp className="h-5 w-5" />    

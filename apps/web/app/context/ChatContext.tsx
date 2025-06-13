@@ -6,12 +6,12 @@ const ChatContext = createContext<{
   question: string;
   setQuestion: (question: string) => void;
 }>({
-  question: '',
+  question: "",
   setQuestion: () => {}
 });
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState("");
   return (
     <ChatContext.Provider value={{ question, setQuestion }}>
       {children}
