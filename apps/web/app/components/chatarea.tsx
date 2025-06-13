@@ -25,6 +25,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const pathname = usePathname();
   const { question, setQuestion } = useChatContext();
   const threadId = pathname.split('/')[2];
+  const [file, setFile] = useState<any | null>(null);
 
   const isThreadExists = 
   useQuery(api.threads.isThreadExists, {
@@ -44,12 +45,14 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     handleSubmit,
     append,
     setMessages,
+    setInput,
   } = useChat({
     api: "/api/chat",
     body: {
       model: selectedModel,
       userId: user?.id,
       threadId,
+      attachments: file ? file : null,
       modelParams: {
         temperature: 0.5,
       },
@@ -58,13 +61,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
 
   const [hasHydratedHistory, setHasHydratedHistory] = useState(false);
 
-  /**
-   * Whenever Convex returns the stored messages for the current thread we
-   * transform them into the shape expected by `useChat` (UIMessage[]) and push
-   * them into the chat state with the `setMessages` helper. After the first
-   * hydration we flip `hasHydratedHistory` so we do not duplicate messages on
-   * subsequent realtime updates coming from Convex.
-   */
   useEffect(() => {
     if (storedMessages) {
       console.log('Stored messages:', storedMessages);
@@ -212,7 +208,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
             />
             <button  
               className="absolute right-0 top-0 h-full px-5 text-white hover:text-white/80 transition-colors" 
-              onClick={handleSubmit}
+              onClick={() => {
+                handleSubmit();
+                setFile(null);
+              }}
             >
               <ArrowBigUp className="h-6 w-6" />
             </button>
@@ -234,8 +233,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
               Attach PDF
             </button>
             <UploadButton
-              endpoint="api/uploadthing"
+              endpoint="imageUploader"
               onClientUploadComplete={(res) => {
+                setFile(res[0]);
+                
                 console.log("Files: ", res);
                 alert("Upload Completed");
               }}

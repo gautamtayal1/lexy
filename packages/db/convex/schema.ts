@@ -70,7 +70,6 @@ export default defineSchema({
   })
   .index("byThreadId", ["threadId"])
   .index("byUserId", ["userId"]),
-  //todo: add index
 
   attachments: defineTable({
     userId: v.string(),
@@ -83,5 +82,6 @@ export default defineSchema({
     fileSize: v.number(),
     fileKey: v.string(),
   })
-  .index("byUserId", ["userId"]),
+  .index("byUserId", ["userId"])
+  .index("byMessageId", ["messageId"]),
 });

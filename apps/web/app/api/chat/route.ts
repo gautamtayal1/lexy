@@ -25,12 +25,14 @@ export async function POST(request: NextRequest) {
       threadId,
       model,
       modelParams,
+      attachments,
     }: {
       userId: string;
       messages: any[];
       threadId: string;
       model: string;
       modelParams: any;
+      attachments: any;
     } = await request.json();
 
     if (!messages || messages.length === 0) {
@@ -55,6 +57,7 @@ export async function POST(request: NextRequest) {
       status: "completed",
       modelParams,
       messageId: userMessageId,
+      // attachments: fileUrl ? [fileUrl] : undefined,
     })
 
     const assistantMessageId = crypto.randomUUID();
@@ -70,11 +73,42 @@ export async function POST(request: NextRequest) {
       modelParams,
     })
     
+    if (attachments) {
+      await convex.mutation(api.attachments.addAttachment, {
+        userId,
+        messageId: assistantMessageId,
+        attachmentUrl: attachments.serverData.fileUrl,
+        fileName: attachments.name,
+        fileType: attachments.type,
+        fileSize: attachments.size,
+        fileKey: attachments.key,
+        attachmentId: crypto.randomUUID(),
+      });
+    }
+    // const URLObject = new URL(attachments.serverData.fileUrl)
     const result = await streamText({
       model: groq("llama-3.1-8b-instant"),
-      // model: openrouter.chat("gpt-4o"),
       system: "you are a helpful assistant",
-      messages,
+      messages: attachments
+        ? [
+            ...messages.slice(0, -1),
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: messages[messages.length - 1].content,
+                },
+                {
+                  type: "image",
+                  image: attachments.serverData.fileUrl,
+                  mimeType: attachments.type,
+                },
+              ],
+            },
+          ]
+        : messages,
+      
       // async onChunk({chunk}) {
       //   await convex.mutation(api.messages.patchMessage, {
       //     messageId: assistantMessageId,

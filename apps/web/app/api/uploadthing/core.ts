@@ -14,7 +14,7 @@ export const ourFileRouter: FileRouter = {
       return {
         fileUrl: file.url,
         fileName: file.name,
-        fileSize: file.size
+        fileSize: file.size,
       };
     }),
 } satisfies FileRouter;
