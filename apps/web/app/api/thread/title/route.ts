@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   const {text} = await generateText({
     model: groq("deepseek-r1-distill-llama-70b"),
     system: "you are a helpful assistant",
-    prompt: `You are a helpful assistant that generates a title for a thread based on the question. First, generate a brief hypothetical answer to the question (5-10 sentences). Then, create a title that captures the essence of that answer. The title should be a single sentence, no more than 25 characters, and should reflect the answer rather than the question itself. If the question appears to be random characters or gibberish, return "New Chat" as the title.
+    prompt: `You are a helpful assistant that generates a title for a thread based on the question. First, generate a brief hypothetical answer to the question (5-10 sentences). Then, create a title that captures the essence of that answer. The title should be a single sentence and should reflect the answer rather than the question itself. NEVER exceed 25 characters. If the question appears to be random characters or gibberish, return "New Chat" as the title.
     Question: ${question}
     Title:`,
   })

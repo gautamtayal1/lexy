@@ -27,7 +27,7 @@ export const addMessage = mutation({
   handler: async(ctx, args) => {
     await ctx.db.insert("messages", {
       ...args,
-      messageId: crypto.randomUUID(),
+      messageId: args.messageId,
       attachmentIds: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -42,7 +42,7 @@ export const patchMessage = mutation({
     status: v.optional(MessageStatusValidator),
     modelResponse: v.optional(v.string()),
   },
-  handler: async (ctx, { messageId, ...patch }) => {
+  handler: async (ctx, { messageId, content, status, modelResponse }) => {
     const msg = await ctx.db
       .query("messages")
       .filter((q) => q.eq(q.field("messageId"), messageId))
@@ -50,7 +50,9 @@ export const patchMessage = mutation({
     if (!msg) throw new Error("message not found");
 
     await ctx.db.patch(msg._id, {
-      ...patch,
+      content,
+      status,
+      modelResponse,
       updatedAt: Date.now(),
     });
   },

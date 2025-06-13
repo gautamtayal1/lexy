@@ -63,22 +63,33 @@ export async function POST(request: NextRequest) {
       threadId: threadInternalId as string,
       messageId: assistantMessageId,
       role: "assistant",
+      // Will be patched with the full text when the stream finishes.
       content: "",
       model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
       status: "thinking",
       modelParams,
     })
-
+    
     const result = await streamText({
       model: groq("llama-3.1-8b-instant"),
       // model: openrouter.chat("gpt-4o"),
       system: "you are a helpful assistant",
       messages,
+      async onFinish({ text }) {
+        console.log('text', text)
+        await convex.mutation(api.messages.patchMessage, {
+          messageId: assistantMessageId,
+          content: text,
+          status: "completed",
+        });
+      },
     })
+
     return result.toDataStreamResponse({
       sendReasoning: true,
       sendSources: true,
     })
+
   } catch (error) {
     console.error("Error in chat route:", error);
     return new Response("Internal Server Error", { status: 500 });
