@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       return new Response("messages are required", { status: 400 });
     }
 
-    const threadInternalId = await convex.mutation(api.threads.ensureThread, {
+      await convex.mutation(api.threads.ensureThread, {
       userId,
       threadId,
       model,
