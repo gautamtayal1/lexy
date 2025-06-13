@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
-import { Authenticated, Unauthenticated } from 'convex/react';
+import { Authenticated, Unauthenticated, useQuery } from 'convex/react';
 import { MenuIcon, PlusIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { api } from '@repo/db/convex/_generated/api';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -14,9 +15,16 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const { user } = useUser();
   const router = useRouter();
+  const threads = useQuery(api.threads.getThread, {
+    userId: user?.id || ""
+  });
 
   const handleNewChat = () => {
     router.push('/');
+  };
+
+  const handleThreadClick = (threadId: string) => {
+    router.push(`/chat/${threadId}`);
   };
 
   return (
@@ -45,19 +53,16 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
 
       <div className="flex-1 overflow-y-auto p-4">
         <h2 className="text-sm font-medium text-white/70 mb-3">Recent Chats</h2>
-        <div className="space-y-2">
-          <div className="p-3 hover:bg-white/20 rounded-lg cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-white">Project Discussion</p>
-            <p className="text-xs text-white/70">Last message: 2 hours ago</p>
-          </div>
-          <div className="p-3 hover:bg-white/20 rounded-lg cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-white">Code Review</p>
-            <p className="text-xs text-white/70">Last message: 1 day ago</p>
-          </div>
-          <div className="p-3 hover:bg-white/20 rounded-lg cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-white">API Integration</p>
-            <p className="text-xs text-white/70">Last message: 2 days ago</p>
-          </div>
+        <div>
+          {threads?.slice().reverse().map((thread) => (
+            <div 
+              key={thread.threadId}
+              onClick={() => handleThreadClick(thread.threadId)}
+              className="p-3 hover:bg-white/20 rounded-lg cursor-pointer transition-colors"
+            >
+              <p className="text-sm font-medium text-white">{thread.title}</p>
+            </div>
+          ))}
         </div>
       </div>
 

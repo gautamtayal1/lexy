@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const ensureThread = mutation({
@@ -53,5 +53,19 @@ export const updateTitle = mutation({
         title,
       });
     }
+  },
+})
+
+export const getThread = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async(ctx, { userId }) => {
+    const threads = await ctx.db
+      .query("threads")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))   
+      .collect();
+
+    return threads;
   },
 })
