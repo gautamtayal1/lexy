@@ -4,7 +4,8 @@ import Image from 'next/image';
 
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "./ConvexProviderWithClerk";
-import { ChatProvider } from "./context/ChatContext";
+
+import { ReduxProvider } from "./providers/ReduxProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -31,9 +32,9 @@ export default function RootLayout({
             signInUrl="/sign-in"
             signUpUrl="/sign-up"
           >
-            <ChatProvider>
+            <ReduxProvider>
               <ConvexClientProvider>{children}</ConvexClientProvider>
-            </ChatProvider>
+            </ReduxProvider>
           </ClerkProvider>
         </div>
       </body>

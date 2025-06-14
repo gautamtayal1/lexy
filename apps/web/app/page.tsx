@@ -6,7 +6,6 @@ import HomePage from './components/HomePage'
 
 const Page = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  // const tasks = useQuery(api.tasks.get);
   return (
     <div className="relative w-full h-full">
       <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />

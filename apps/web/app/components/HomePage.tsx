@@ -1,9 +1,11 @@
 "use client"
 
 import React, { useState } from 'react';
-import { ArrowBigUp, FileUp, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useChatContext } from '../context/ChatContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setQuestion } from '../store/chatSlice';
+import ChatControls from './ChatControls';
 
 interface HomePageProps {
   isSidebarOpen: boolean;
@@ -13,19 +15,23 @@ interface HomePageProps {
 const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const [input, setInput] = useState("");
   const router = useRouter();
-  const { setQuestion } = useChatContext();
+  const dispatch = useAppDispatch();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    setQuestion(input);
+    dispatch(setQuestion(input));
     const id = crypto.randomUUID();
     router.push(`/chat/${id}`);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+  };
+
   const handleQuestionClick = (question: string) => {
     const id = crypto.randomUUID();
-    setQuestion(question);
+    dispatch(setQuestion(question));
     router.push(`/chat/${id}`);
   };
 
@@ -64,35 +70,12 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
       </div>
 
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
-        <div className="backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-3">
-          <div className="relative mb-4">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  handleSubmit(e);
-                }
-              }}
-              placeholder="Type your message..."
-              className="w-full text-white placeholder-white/50 rounded-xl py-4 px-5 pr-14 text-base focus:outline-none"
-            />
-            <button  
-              className="absolute right-0 top-0 h-full px-5 text-white hover:text-white/80 transition-colors" 
-              onClick={handleSubmit}
-            >
-              <ArrowBigUp className="h-6 w-6" />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="text-white rounded-lg px-4 py-2 text-base flex items-center gap-2 transition-colors">
-              <FileUp className="h-5 w-5" />    
-              Attach PDF
-            </button>
-          </div>
-        </div>
+        <ChatControls
+          input={input}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          placeholder="Type your message..."
+        />
       </div>
     </div>
   );

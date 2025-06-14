@@ -5,7 +5,8 @@ import { Menu } from "lucide-react";
 import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { useChatContext } from '../context/ChatContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { resetChatState } from '../store/chatSlice';
 import { useApiKeys } from '../hooks/useApiKeys';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
@@ -23,13 +24,18 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   const { user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
-  const { question, setQuestion } = useChatContext();
+  const dispatch = useAppDispatch();
+  const { question, selectedModel: reduxSelectedModel, isCreativeMode, attachedFiles } = useAppSelector((state) => state.chat);
   const { apiKeys } = useApiKeys();
   const threadId = pathname.split('/')[2];
   const [file, setFile] = useState<any | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [isCreativeMode, setIsCreativeMode] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-4.1-mini");
+  // Use Redux state for creative mode
+  const [localIsCreativeMode, setLocalIsCreativeMode] = useState(false);
+  const finalIsCreativeMode = isCreativeMode !== undefined ? isCreativeMode : localIsCreativeMode;
+  // Use Redux state for selectedModel, fallback to local state for compatibility
+  const [localSelectedModel, setLocalSelectedModel] = useState("openai/gpt-4.1-mini");
+  const selectedModel = reduxSelectedModel || localSelectedModel;
 
   const isThreadExists = useQuery(api.threads.isThreadExists, {
     userId: user?.id || "",
@@ -56,7 +62,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
       attachments: file ? file : null,
       apiKeys: apiKeys,
       modelParams: {
-        temperature: 0.5,
+        temperature: isCreativeMode ? 0.8 : 0.3,
+        topK: isCreativeMode ? 50 : 10,
       },
     }
   })
@@ -100,7 +107,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
         }
         setThreadTitle();
         setIsInitialized(true);
-        setQuestion("");
+        dispatch(resetChatState());
       }
     }
   }, [isInitialized, question]);
@@ -156,7 +163,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   };
 
   const handleToggleCreativeMode = () => {
-    setIsCreativeMode(!isCreativeMode);
+    setLocalIsCreativeMode(!localIsCreativeMode);
   };
 
   // Get the appropriate messages to display
@@ -187,10 +194,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
         input={input}
         onInputChange={handleInputChange}
         onSubmit={handleSubmitWithCleanup}
-        isCreativeMode={isCreativeMode}
+        isCreativeMode={finalIsCreativeMode}
         onToggleCreativeMode={handleToggleCreativeMode}
         selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
+        onModelChange={setLocalSelectedModel}
         onFileUpload={handleFileUpload}
         onFileUploadStart={handleFileUploadStart}
       />
