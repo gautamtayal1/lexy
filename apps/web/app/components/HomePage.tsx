@@ -36,14 +36,14 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   };
 
   const suggestedQuestions = [
-    "What are the key differences between React and Vue.js?",
-    "How can I implement authentication in a Next.js application?",
-    "What are the best practices for state management in React?",
-    "How do I optimize performance in a React application?"
+    "Explain the difference between REST and GraphQL in simple terms.",
+    "Give me quick productivity tips for remote work.",
+    "Write a haiku about sidewalks after rain.",
+    "Summarise 'The Pragmatic Programmer' in 3 bullet-points."
   ];
 
   return (
-    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] overflow-hidden shadow rounded-2xl border border-white/20 bg-gradient-to-br from-[#111827] via-[#0f172a] to-[#0e1025] flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
       {!isSidebarOpen && (
         <button 
           onClick={onToggleSidebar}
@@ -54,16 +54,27 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <div className="w-[95%] max-w-4xl mx-auto space-y-8 py-8">
-          <div className="h-full flex flex-col items-center justify-center space-y-6">
+        <div className="w-[95%] max-w-4xl mx-auto py-12 flex flex-col gap-12 items-center">
+          {/* Hero */}
+          <div className="text-center space-y-4">
+            <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-teal-200 text-5xl font-extrabold tracking-tight drop-shadow-md">
+              Your AI Sidekick
+            </h1>
+            <p className="text-white/80 max-w-xl mx-auto text-lg">
+              Ask anything, brainstorm ideas, or get instant explanations — all in one minimal chat.
+            </p>
+          </div>
+
+          {/* Quick suggestions */}
+          <div className="grid sm:grid-cols-2 gap-6 w-full max-w-2xl">
             {suggestedQuestions.map((question, index) => (
-              <h2 
+              <button
                 key={index}
                 onClick={() => handleQuestionClick(question)}
-                className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
+                className="bg-white/10 hover:bg-white/20 transition-colors backdrop-blur rounded-xl p-4 text-left text-white text-sm md:text-base shadow border border-white/20"
               >
                 {question}
-              </h2>
+              </button>
             ))}
           </div>
         </div>

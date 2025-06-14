@@ -49,6 +49,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   const {
     messages,
     input,
+    setInput,
     handleInputChange,
     handleSubmit,
     append,
@@ -123,6 +124,22 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
     }
   }, [messages]);
 
+  // Quote selected text into input
+  const handleQuote = (text: string) => {
+    const quoted = text.split('\n').map(line => `> ${line}`).join('\n');
+    setInput((prev: string) => prev + (prev ? '\n' : '') + quoted + '\n');
+  };
+
+  // Share chat handler
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      alert('Chat link copied to clipboard!');
+    } catch {
+      alert('Failed to copy link.');
+    }
+  };
+
   // Handler functions for the modular components
   const handleRemoveFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
@@ -177,6 +194,11 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
 
   return (
     <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+      {/* Header with share button */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-white/10">
+        <span className="text-white/80 text-sm">Chat</span>
+        <button onClick={handleShare} className="text-white/70 hover:text-white text-sm">Share</button>
+      </div>
       {!isSidebarOpen && (
         <button 
           onClick={onToggleSidebar}
@@ -200,6 +222,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
         onModelChange={setLocalSelectedModel}
         onFileUpload={handleFileUpload}
         onFileUploadStart={handleFileUploadStart}
+        onQuote={handleQuote}
       />
     </div>
   );
