@@ -16,9 +16,10 @@ import ModelDropdown from './ModelDropdown';
 interface ChatAreaProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
+  theme: string;
 }
 
-const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
+const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
   const [selectedModel, setSelectedModel] = useState("groq/llama-3.1-8b-instant");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -204,8 +205,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
       </div>
 
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
-        <div className="backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-2">
-          <div className="relative mb-2">
+        <div className="backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-3">
+          <div className="relative mb-4">
             <textarea
               value={input}
               onChange={handleInputChange}
@@ -216,38 +217,42 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
                 }
               }}
               placeholder="Type your message..."
-              className="w-full text-white placeholder-white/50 rounded-xl py-2 px-4 pr-12 text-base focus:outline-none resize-none overflow-hidden"
+              className="w-full text-white placeholder-white/50 rounded-xl py-3 px-4 pr-12 text-base focus:outline-none resize-y overflow-hidden min-h-[60px]"
               rows={1}
-              style={{ minHeight: '40px' }}
+              style={{ minHeight: '60px' }}
             />
-            <button  
-              className="absolute right-0 top-0 h-full px-4 text-white hover:text-white/80 transition-colors" 
-              onClick={() => {
-                handleSubmit();
-                setFile(null);
-              }}
-            >
-              <ArrowBigUp className="h-5 w-5" />
-            </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <ModelDropdown selectedModel={selectedModel} onModelChange={setSelectedModel} />
-            <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
-              {/* <FileUp className="h-4 w-4" />    
-              <UploadButton
-              endpoint="imageUploader"
-              onClientUploadComplete={(res) => {
-                setFile(res[0]);
-                
-                console.log("Files: ", res);
-                alert("Upload Completed");
-              }}
-              onUploadError={(error: Error) => {
-                alert(`ERROR! ${error.message}`);
-              }}
-            /> */}
-            </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">
+                {/* <FileUp className="h-4 w-4" />    
+                <UploadButton
+                endpoint="imageUploader"
+                onClientUploadComplete={(res) => {
+                  setFile(res[0]);
+                  
+                  console.log("Files: ", res);
+                  alert("Upload Completed");
+                }}
+                onUploadError={(error: Error) => {
+                  alert(`ERROR! ${error.message}`);
+                }}
+              /> */}
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <ModelDropdown selectedModel={selectedModel} onModelChange={setSelectedModel} />
+              <button  
+                className="text-white hover:text-white/80 transition-colors p-2" 
+                onClick={() => {
+                  handleSubmit();
+                  setFile(null);
+                }}
+              >
+                <ArrowBigUp className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

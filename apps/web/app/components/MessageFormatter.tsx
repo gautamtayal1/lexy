@@ -76,7 +76,7 @@ const MessageFormatter: React.FC<MessageFormatterProps> = ({ content, className 
                      borderRadius: '0 0 0.5rem 0.5rem',
                      border: '1px solid rgba(255, 255, 255, 0.1)',
                      borderTop: 'none',
-                    //  backgroundColor: '#1e2945',
+                     backgroundColor: '#1e1a29',
                    }}
                    {...props}
                  >

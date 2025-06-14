@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Image from 'next/image';
 
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "./ConvexProviderWithClerk";
@@ -18,14 +19,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ClerkProvider
-          signInUrl="/sign-in"
-          signUpUrl="/sign-up"
-        >
-          <ChatProvider>
-            <ConvexClientProvider>{children}</ConvexClientProvider>
-          </ChatProvider>
-        </ClerkProvider>
+        <div className="relative w-screen h-screen">
+          <Image 
+            src="/neww.jpg" 
+            alt="background" 
+            fill
+            className="object-cover"
+            priority
+          />
+          <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
+          >
+            <ChatProvider>
+              <ConvexClientProvider>{children}</ConvexClientProvider>
+            </ChatProvider>
+          </ClerkProvider>
+        </div>
       </body>
     </html>
   );
