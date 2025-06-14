@@ -12,7 +12,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 const groqModels = [
   "llama-3.3-70b-versatile",
-  "deepseek/deepseek-r1-distill-llama-70b",
+  "deepseek-r1-distill-llama-70b",
 ]
 
 const openrouterModels = [
@@ -169,12 +169,14 @@ export async function POST(request: NextRequest) {
       //     status: "completed",
       //   });
       // },
-      async onFinish({ text }) {
+      async onFinish({ text, reasoning }) {
         console.log('text', text)
+        console.log('reasoning', reasoning)
         await convex.mutation(api.messages.patchMessage, {
           messageId: assistantMessageId,
           content: text,
           status: "completed",
+          modelResponse: reasoning,
         });
       },
     })

@@ -39,6 +39,7 @@ interface ChatContainerProps {
   onModelChange: (model: string) => void;
   onFileUpload: (files: any[]) => void;
   onFileUploadStart: (files: any[]) => void;
+  status: "submitted" | "streaming" | "ready" | "error";
 }
 
 export default function ChatContainer({
@@ -54,11 +55,12 @@ export default function ChatContainer({
   selectedModel,
   onModelChange,
   onFileUpload,
-  onFileUploadStart
+  onFileUploadStart,
+  status
 }: ChatContainerProps) {
   return (
     <>
-      <MessageList messages={messages} messagesEndRef={messagesEndRef} />
+      <MessageList messages={messages} messagesEndRef={messagesEndRef} status={status} />
       
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
         <div className="backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-3 transition-all duration-300 ease-in-out">

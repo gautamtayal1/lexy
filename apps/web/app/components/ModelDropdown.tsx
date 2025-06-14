@@ -14,7 +14,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     { id: "openai/gpt-4.1-mini", name: "GPT-4.1" },
     { id: "openai/o4-mini", name: "O4-mini" },
     { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7" },
-    { id: "deepseek/deepseek-r1-distill-llama-70b", name: "DeepSeek" },
+    { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek" },
     { id: "llama-3.3-70b-versatile", name: "Llama 3.3" },
     { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0" },
     { id: "google/gemini-2.5-pro-preview", name: "Gemini 2.5" },

@@ -17,7 +17,7 @@ interface ChatState {
 
 const initialState: ChatState = {
   question: '',
-  selectedModel: 'deepseek/deepseek-r1-distill-llama-70b',
+  selectedModel: 'deepseek-r1-distill-llama-70b',
   isCreativeMode: false,
   attachedFiles: [],
 };

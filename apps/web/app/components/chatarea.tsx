@@ -6,7 +6,7 @@ import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { resetChatState } from '../store/chatSlice';
+import { resetChatState, setSelectedModel } from '../store/chatSlice';
 import { useApiKeys } from '../hooks/useApiKeys';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
@@ -25,7 +25,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { question, selectedModel: reduxSelectedModel, isCreativeMode, attachedFiles } = useAppSelector((state) => state.chat);
+  const { question, selectedModel, isCreativeMode, attachedFiles } = useAppSelector((state) => state.chat);
   const { apiKeys } = useApiKeys();
   const threadId = pathname.split('/')[2];
   const [file, setFile] = useState<any | null>(null);
@@ -33,9 +33,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   // Use Redux state for creative mode
   const [localIsCreativeMode, setLocalIsCreativeMode] = useState(false);
   const finalIsCreativeMode = isCreativeMode !== undefined ? isCreativeMode : localIsCreativeMode;
-  // Use Redux state for selectedModel, fallback to local state for compatibility
-  const [localSelectedModel, setLocalSelectedModel] = useState("openai/gpt-4.1-mini");
-  const selectedModel = reduxSelectedModel || localSelectedModel;
 
   const isThreadExists = useQuery(api.threads.isThreadExists, {
     userId: user?.id || "",
@@ -53,8 +50,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
     handleSubmit,
     append,
     setMessages,
+    status,
   } = useChat({
     api: "/api/chat",
+    id: threadId,
     body: {
       model: selectedModel,
       userId: user?.id,
@@ -62,8 +61,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
       attachments: file ? file : null,
       apiKeys: apiKeys,
       modelParams: {
-        temperature: isCreativeMode ? 0.8 : 0.3,
-        topK: isCreativeMode ? 50 : 10,
+        temperature: finalIsCreativeMode ? 0.8 : 0.3,
+        topK: finalIsCreativeMode ? 50 : 10,
       },
     }
   })
@@ -166,6 +165,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
     setLocalIsCreativeMode(!localIsCreativeMode);
   };
 
+  const handleModelChange = (model: string) => {
+    dispatch(setSelectedModel(model));
+  };
+
   // Get the appropriate messages to display
   const displayMessages = messages || storedMessages?.map(message => ({
     id: message.messageId,
@@ -197,9 +200,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
         isCreativeMode={finalIsCreativeMode}
         onToggleCreativeMode={handleToggleCreativeMode}
         selectedModel={selectedModel}
-        onModelChange={setLocalSelectedModel}
+        onModelChange={handleModelChange}
         onFileUpload={handleFileUpload}
         onFileUploadStart={handleFileUploadStart}
+        status={status}
       />
     </div>
   );
