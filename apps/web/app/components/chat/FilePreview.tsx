@@ -9,6 +9,7 @@ interface UploadedFile {
   serverData?: {
     fileUrl: string;
   };
+  isUploading?: boolean;
 }
 
 interface FilePreviewProps {
@@ -29,7 +30,11 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="relative bg-white/10 rounded-xl border border-white/20 p-2 hover:bg-white/20 transition-all duration-200">
-              {uploadedFile.type?.startsWith('image/') ? (
+              {uploadedFile.isUploading ? (
+                <div className="w-16 h-16 flex items-center justify-center rounded-lg bg-white/10">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white"></div>
+                </div>
+              ) : uploadedFile.type?.startsWith('image/') ? (
                 <img 
                   src={uploadedFile.serverData?.fileUrl || uploadedFile.url} 
                   alt={uploadedFile.name}
@@ -43,16 +48,18 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
                 </div>
               )}
               
-              <button
-                onClick={() => onRemoveFile(index)}
-                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors opacity-0 group-hover:opacity-100"
-              >
-                ×
-              </button>
+              {!uploadedFile.isUploading && (
+                <button
+                  onClick={() => onRemoveFile(index)}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  ×
+                </button>
+              )}
             </div>
             
             <p className="text-xs text-white/70 mt-1 text-center truncate max-w-16">
-              {uploadedFile.name}
+              {uploadedFile.isUploading ? 'Uploading...' : uploadedFile.name}
             </p>
           </div>
         ))}

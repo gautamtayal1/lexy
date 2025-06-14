@@ -11,6 +11,7 @@ interface ChatControlsProps {
   selectedModel: string;
   onModelChange: (model: string) => void;
   onFileUpload: (files: any[]) => void;
+  onFileUploadStart: (files: any[]) => void;
   onSubmit: () => void;
 }
 
@@ -20,6 +21,7 @@ export default function ChatControls({
   selectedModel,
   onModelChange,
   onFileUpload,
+  onFileUploadStart,
   onSubmit
 }: ChatControlsProps) {
   return (
@@ -38,6 +40,15 @@ export default function ChatControls({
         <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">    
           <UploadButton
             endpoint="imageUploader"
+            onUploadBegin={(name) => {
+              // Create loading file object when upload starts
+              const loadingFile = {
+                name: name,
+                isUploading: true,
+                type: 'loading'
+              };
+              onFileUploadStart([loadingFile]);
+            }}
             onClientUploadComplete={(res) => {
               onFileUpload(res);
             }}
@@ -50,7 +61,7 @@ export default function ChatControls({
               allowedContent: "hidden"
             }}
             content={{
-              button: "📎 Attach File",
+              button: "📎 Attach",
               allowedContent: ""
             }}
           />

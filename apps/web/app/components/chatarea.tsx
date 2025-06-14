@@ -121,10 +121,29 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
     }
   };
 
+  const handleFileUploadStart = (files: any[]) => {
+    // Add loading file to preview immediately
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
   const handleFileUpload = (files: any[]) => {
     const newFile = files[0];
     setFile(newFile);
-    setUploadedFiles(prev => [...prev, newFile]);
+    
+    // Replace the loading file with the actual uploaded file
+    setUploadedFiles(prev => {
+      const newFiles = [...prev];
+      // Find the loading file and replace it
+      const loadingIndex = newFiles.findIndex(f => f.isUploading);
+      if (loadingIndex !== -1) {
+        newFiles[loadingIndex] = newFile;
+      } else {
+        // If no loading file found, just add the new file
+        newFiles.push(newFile);
+      }
+      return newFiles;
+    });
+    
     console.log("Files: ", files);
   };
 
@@ -171,6 +190,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
         onFileUpload={handleFileUpload}
+        onFileUploadStart={handleFileUploadStart}
       />
     </div>
   );

@@ -22,6 +22,7 @@ interface UploadedFile {
   serverData?: {
     fileUrl: string;
   };
+  isUploading?: boolean;
 }
 
 interface ChatContainerProps {
@@ -37,6 +38,7 @@ interface ChatContainerProps {
   selectedModel: string;
   onModelChange: (model: string) => void;
   onFileUpload: (files: any[]) => void;
+  onFileUploadStart: (files: any[]) => void;
 }
 
 export default function ChatContainer({
@@ -51,7 +53,8 @@ export default function ChatContainer({
   onToggleCreativeMode,
   selectedModel,
   onModelChange,
-  onFileUpload
+  onFileUpload,
+  onFileUploadStart
 }: ChatContainerProps) {
   return (
     <>
@@ -73,6 +76,7 @@ export default function ChatContainer({
             selectedModel={selectedModel}
             onModelChange={onModelChange}
             onFileUpload={onFileUpload}
+            onFileUploadStart={onFileUploadStart}
             onSubmit={onSubmit}
           />
         </div>
