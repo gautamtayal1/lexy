@@ -17,6 +17,19 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY!,
 })
 
+const groqModels = [
+  "llama-3.3-70b-versatile",
+  "deepseek-r1-distill-llama-70b",
+]
+
+const openrouterModels = [
+  "openai/gpt-4.1-mini",
+  "openai/o4-mini",
+  "anthropic/claude-3-5-sonnet-20240620",
+  "google/gemini-2.0-flash-exp:free",
+  "google/gemini-2.5-pro-preview",
+]
+
 export async function POST(request: NextRequest) {
   try {
     const { 
@@ -39,11 +52,11 @@ export async function POST(request: NextRequest) {
       return new Response("messages are required", { status: 400 });
     }
 
-      await convex.mutation(api.threads.ensureThread, {
-      userId,
-      threadId,
-      model,
-      title: "sample thread",
+    await convex.mutation(api.threads.ensureThread, {
+    userId,
+    threadId,
+    model,
+    title: "New Chat",
     });
     
     const userMessageId = crypto.randomUUID();
@@ -85,9 +98,8 @@ export async function POST(request: NextRequest) {
         attachmentId: crypto.randomUUID(),
       });
     }
-    // const URLObject = new URL(attachments.serverData.fileUrl)
     const result = await streamText({
-      model: groq("llama-3.1-8b-instant"),
+      model: groqModels.includes(model) ? groq(model) : openrouter(model),
       system: "you are a helpful assistant",
       messages: attachments
         ? [
@@ -108,7 +120,6 @@ export async function POST(request: NextRequest) {
             },
           ]
         : messages,
-      
       // async onChunk({chunk}) {
       //   await convex.mutation(api.messages.patchMessage, {
       //     messageId: assistantMessageId,

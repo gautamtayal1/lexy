@@ -38,7 +38,7 @@ export default defineSchema({
     userId: v.string(),
     messageId: v.string(),
     threadId: v.string(),
-    attachmentIds: v.array(v.string()), //todo: add attachment table
+    attachmentIds: v.array(v.string()),
 
     content: v.string(),
     model: v.string(),

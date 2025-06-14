@@ -12,7 +12,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('customization');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900/20 to-purple-900/20 relative">
+    <div className="min-h-screen bg-gradient-to-br relative">
       <Unauthenticated>
         <div className="flex items-center justify-center min-h-screen">
           <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border border-white/20">
@@ -26,8 +26,7 @@ export default function SettingsPage() {
         </div>
       </Unauthenticated>
 
-              <Authenticated>
-          {/* Top Navigation */}
+        <Authenticated>
           <div className="fixed top-0 left-0 right-0 h-[18vh] flex items-center justify-center">
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 px-6 py-4 flex items-center justify-between w-full max-w-7xl mx-6">
               <SettingsNavigation />
@@ -35,12 +34,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex min-h-screen pt-[18vh] p-6 gap-6">
-            {/* Left Panel - User Profile (30%) */}
             <div className="w-[30%]">
               <UserProfilePanel />
             </div>
 
-            {/* Right Panel - Settings Content (70%) */}
             <div className="w-[70%]">
               <SettingsTabPanel activeTab={activeTab} onTabChange={setActiveTab} />
             </div>

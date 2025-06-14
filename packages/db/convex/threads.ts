@@ -6,9 +6,10 @@ export const ensureThread = mutation({
     userId: v.string(),
     threadId: v.optional(v.string()),
     title: v.string(),
-    model: v.string() 
+    model: v.string(),
+    status: v.optional(v.union(v.literal("pending"), v.literal("generating"), v.literal("completed"), v.literal("error")))
   },
-  handler: async(ctx, { userId, threadId, title, model }) => {
+  handler: async(ctx, { userId, threadId, title, model, status }) => {
     if (threadId) {
       const thread = await ctx.db
         .query("threads")
@@ -24,7 +25,7 @@ export const ensureThread = mutation({
         userId,
         title,
         model,
-        status: "pending",
+        status: status || "generating",
         threadId: threadId,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -35,13 +36,14 @@ export const ensureThread = mutation({
   },
 })
 
-export const updateTitle = mutation({
+export const updateThread = mutation({
   args: {
     userId: v.string(),
     threadId: v.string(),
     title: v.string(),
+    status: v.optional(v.union(v.literal("pending"), v.literal("generating"), v.literal("completed"), v.literal("error")))
   },
-  handler: async(ctx, { userId, threadId, title }) => {
+  handler: async(ctx, { userId, threadId, title, status }) => {
     const thread = await ctx.db
       .query("threads")
       .withIndex("byUserId", (q) => q.eq("userId", userId))
@@ -90,3 +92,4 @@ export const isThreadExists = query({
     return !!thread;
   },
 })
+

@@ -3,7 +3,7 @@
 import React from 'react';
 import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
 import { Authenticated, Unauthenticated, useQuery } from 'convex/react';
-import { MenuIcon, PlusIcon } from 'lucide-react';
+import { MenuIcon, PlusIcon, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@repo/db/convex/_generated/api';
 
@@ -25,6 +25,10 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
 
   const handleThreadClick = (threadId: string) => {
     router.push(`/chat/${threadId}`);
+  };
+
+  const handleSettingsClick = () => {
+    router.push('/settings');
   };
 
   return (
@@ -79,8 +83,16 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
             <div className="h-10 w-10 rounded-full bg-white/30 flex items-center justify-center">
               <span className="text-sm font-medium text-white">{user?.firstName?.charAt(0)}</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-white">{user?.firstName} {user?.lastName}</p>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-white">{user?.firstName} {user?.lastName}</p>
+                <button 
+                  onClick={handleSettingsClick}
+                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <Settings className="w-4 h-4 text-white/70 hover:text-white" />
+                </button>
+              </div>
               <SignOutButton />
             </div>
           </div>
