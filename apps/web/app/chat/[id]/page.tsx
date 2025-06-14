@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Sidebar from "../../components/Sidebar"
-import ChatArea from "../../components/ChatArea"
+import ChatArea from "../../components/chatarea"
 
 const Page = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

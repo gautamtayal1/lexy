@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { streamText } from "ai";
+import { streamText, experimental_generateImage as generateImage } from "ai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 import { createGroq } from "@ai-sdk/groq";
+import { openai } from "@ai-sdk/openai";
 
 export const runtime = "edge";
 
@@ -94,6 +95,31 @@ export async function POST(request: NextRequest) {
         attachmentId: crypto.randomUUID(),
       });
     }
+
+    if (model === "gpt-image-1") {
+      const { image } = await generateImage({
+        model: openai.image('gpt-image-1'),
+        prompt: 'Santa Claus driving a Cadillac',
+      });
+
+    const response = await fetch('/api/uploadthing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image: image,
+        fileName: 'generated-image.png',
+        fileType: 'image/png',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload generated image');
+    }
+    console.log('image', image)
+    }
+
 
     // Create AI providers
     let aiProvider;
