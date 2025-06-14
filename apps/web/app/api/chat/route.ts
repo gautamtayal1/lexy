@@ -9,14 +9,6 @@ export const runtime = "edge";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY!,
-})
-
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY!,
-})
-
 const groqModels = [
   "llama-3.3-70b-versatile",
   "deepseek-r1-distill-llama-70b",
@@ -39,6 +31,7 @@ export async function POST(request: NextRequest) {
       model,
       modelParams,
       attachments,
+      apiKeys,
     }: {
       userId: string;
       messages: any[];
@@ -46,6 +39,9 @@ export async function POST(request: NextRequest) {
       model: string;
       modelParams: any;
       attachments: any;
+      apiKeys?: {
+        openrouter?: string;
+      };
     } = await request.json();
 
     if (!messages || messages.length === 0) {
@@ -98,8 +94,28 @@ export async function POST(request: NextRequest) {
         attachmentId: crypto.randomUUID(),
       });
     }
+
+    // Create AI providers
+    let aiProvider;
+    if (groqModels.includes(model)) {
+      // Use your Groq API key for Groq models
+      if (!process.env.GROQ_API_KEY) {
+        return new Response("Groq API key not configured on server.", { status: 500 });
+      }
+      const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+      aiProvider = groq(model);
+    } else {
+      // Use user's OpenRouter key or fallback to server key
+      const openrouterApiKey = apiKeys?.openrouter || process.env.OPENROUTER_API_KEY;
+      if (!openrouterApiKey) {
+        return new Response("OpenRouter API key required. Please configure it in settings.", { status: 400 });
+      }
+      const openrouter = createOpenRouter({ apiKey: openrouterApiKey });
+      aiProvider = openrouter(model);
+    }
+
     const result = await streamText({
-      model: groqModels.includes(model) ? groq(model) : openrouter(model),
+      model: aiProvider,
       system: "you are a helpful assistant",
       messages: attachments
         ? [

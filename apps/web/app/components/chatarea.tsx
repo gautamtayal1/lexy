@@ -6,6 +6,7 @@ import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useChatContext } from '../context/ChatContext';
+import { useApiKeys } from '../hooks/useApiKeys';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
@@ -23,6 +24,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
   const { question, setQuestion } = useChatContext();
+  const { apiKeys } = useApiKeys();
   const threadId = pathname.split('/')[2];
   const [file, setFile] = useState<any | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -52,6 +54,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
       userId: user?.id,
       threadId,
       attachments: file ? file : null,
+      apiKeys: apiKeys,
       modelParams: {
         temperature: 0.5,
       },
@@ -127,9 +130,9 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   };
 
   const handleFileUpload = (files: any[]) => {
-    const newFile = files[0];
-    setFile(newFile);
-    
+    const newFile = files;
+    setFile(prev => [...prev, newFile]);
+  
     // Replace the loading file with the actual uploaded file
     setUploadedFiles(prev => {
       const newFiles = [...prev];
@@ -143,7 +146,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
       }
       return newFiles;
     });
-    
     console.log("Files: ", files);
   };
 

@@ -1,8 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Palette, History, Brain, Key } from 'lucide-react';
 import { SettingsTab, SettingsTabPanelProps } from '../../types/settings';
+import { apiKeyUtils, ApiKeyConfig } from '../../utils/apiKeys';
+import { useApiKeys } from '../../hooks/useApiKeys';
 
 const tabs = [
   { id: 'customization', label: 'Customization', icon: Palette },
@@ -166,46 +168,155 @@ function ModelsContent() {
 }
 
 function ApiKeysContent() {
+  const { apiKeys, saveApiKeys, removeApiKey, clearAllApiKeys } = useApiKeys();
+  const [tempKeys, setTempKeys] = useState<ApiKeyConfig>({});
+  const [showKey, setShowKey] = useState(false);
+  const [validationError, setValidationError] = useState('');
+
+  // Initialize temp keys when apiKeys change
+  useEffect(() => {
+    setTempKeys(apiKeys);
+  }, [apiKeys]);
+
+  const handleKeyChange = (value: string) => {
+    setTempKeys({ openrouter: value });
+    
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError('');
+    }
+  };
+
+  const handleSaveKey = () => {
+    const key = tempKeys.openrouter;
+    
+    if (!key || !key.trim()) {
+      // Remove the key if empty
+      removeApiKey('openrouter');
+      setValidationError('');
+      return;
+    }
+
+    if (!apiKeyUtils.validateApiKey('openrouter', key)) {
+      setValidationError('Invalid OpenRouter API key format (should start with sk-or-)');
+      return;
+    }
+
+    // Save the key
+    saveApiKeys({ openrouter: key });
+    setValidationError('');
+  };
+
+  const handleRemoveKey = () => {
+    removeApiKey('openrouter');
+    setTempKeys({ openrouter: '' });
+    setValidationError('');
+  };
+
+  const toggleShowKey = () => {
+    setShowKey(!showKey);
+  };
+
+  const handleClearAll = () => {
+    if (confirm('Are you sure you want to remove your OpenRouter API key? This action cannot be undone.')) {
+      clearAllApiKeys();
+      setTempKeys({});
+      setValidationError('');
+    }
+  };
+
+  const hasKey = apiKeys.openrouter && apiKeys.openrouter.trim();
+  const currentValue = tempKeys.openrouter || '';
+
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-6">API Keys</h2>
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-white font-medium mb-3">OpenAI API Key</h3>
-          <div className="flex gap-3">
-            <input
-              type="password"
-              placeholder="sk-..."
-              className="flex-1 p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50"
-            />
-            <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
-              Save
-            </button>
-          </div>
-        </div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white">API Keys</h2>
+        {hasKey && (
+          <button
+            onClick={handleClearAll}
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1 rounded-lg transition-colors border border-red-500/30 text-sm"
+          >
+            Remove Key
+          </button>
+        )}
+      </div>
 
-        <div>
-          <h3 className="text-white font-medium mb-3">Anthropic API Key</h3>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-white font-medium">OpenRouter API Key</h3>
+              <p className="text-white/50 text-sm">For access to multiple AI models</p>
+            </div>
+            {hasKey && (
+              <div className="flex items-center gap-2">
+                <span className="text-green-400 text-sm">✓ Configured</span>
+                <button
+                  onClick={handleRemoveKey}
+                  className="text-red-400 hover:text-red-300 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-3">
-            <input
-              type="password"
-              placeholder="sk-ant-..."
-              className="flex-1 p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50"
-            />
-            <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
+            <div className="flex-1 relative">
+              <input
+                type={showKey ? "text" : "password"}
+                value={hasKey && !showKey ? apiKeyUtils.getMaskedApiKey(apiKeys.openrouter!) : currentValue}
+                onChange={(e) => handleKeyChange(e.target.value)}
+                onFocus={() => {
+                  if (hasKey) {
+                    setTempKeys({ openrouter: apiKeys.openrouter });
+                  }
+                }}
+                placeholder="sk-or-..."
+                className={`w-full p-3 bg-white/10 border rounded-lg text-white placeholder-white/50 pr-12 ${
+                  validationError ? 'border-red-500/50' : 'border-white/20'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={toggleShowKey}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80"
+              >
+                {showKey ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+            <button
+              onClick={handleSaveKey}
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors"
+            >
               Save
             </button>
           </div>
+
+          {validationError && (
+            <p className="text-red-400 text-sm">{validationError}</p>
+          )}
         </div>
 
         <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-          <h4 className="text-amber-400 font-medium mb-2">Security Notice</h4>
-          <p className="text-amber-300/70 text-sm">
-            API keys are encrypted and stored securely. Never share your API keys with others.
+          <h4 className="text-amber-400 font-medium mb-2">🔒 Security Notice</h4>
+          <ul className="text-amber-300/70 text-sm space-y-1">
+            <li>• API key is encrypted and stored locally in your browser</li>
+            <li>• Key is never sent to our servers - used directly with OpenRouter</li>
+            <li>• Clearing browser data will remove the stored key</li>
+            <li>• Never share your API key with others</li>
+          </ul>
+        </div>
+
+        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <h4 className="text-blue-400 font-medium mb-2">💡 How it works</h4>
+          <p className="text-blue-300/70 text-sm">
+            When you provide your OpenRouter API key, requests are made directly to OpenRouter using your key. 
+            This gives you full control over usage and billing, and provides access to all available models.
           </p>
         </div>
       </div>
     </div>
   );
-
 } 
