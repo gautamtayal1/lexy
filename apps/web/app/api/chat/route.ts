@@ -11,7 +11,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 const groqModels = [
   "llama-3.3-70b-versatile",
-  "deepseek-r1-distill-llama-70b",
+  "deepseek/deepseek-r1-distill-llama-70b",
 ]
 
 const openrouterModels = [

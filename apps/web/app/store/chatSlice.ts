@@ -17,7 +17,7 @@ interface ChatState {
 
 const initialState: ChatState = {
   question: '',
-  selectedModel: 'openai/gpt-4.1-mini',
+  selectedModel: 'deepseek/deepseek-r1-distill-llama-70b',
   isCreativeMode: false,
   attachedFiles: [],
 };
