@@ -16,16 +16,16 @@ import ChatContainer from './chat/ChatContainer';
 interface ChatAreaProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
-  theme: string;
 }
 
-const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
+const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { question, selectedModel, isCreativeMode, attachedFiles } = useAppSelector((state) => state.chat);
+  const theme = useAppSelector((state) => state.theme.theme);
   const { apiKeys } = useApiKeys();
   const threadId = pathname.split('/')[2];
   const [file, setFile] = useState<any | null>(null);
@@ -179,13 +179,23 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, theme }: ChatAreaProps) => {
   })) || [];
 
   return (
-    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border flex flex-col transition-all duration-300 ${
+      isSidebarOpen ? 'left-[24rem]' : 'left-8'
+    } ${
+      theme === 'dark' 
+        ? 'border-white/20 bg-white/5' 
+        : 'border-black/20 bg-black/5'
+    }`}>
       {!isSidebarOpen && (
         <button 
           onClick={onToggleSidebar}
-          className="absolute -left-12 top-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+          className={`absolute -left-12 top-4 p-2 rounded-lg transition-colors ${
+            theme === 'dark' 
+              ? 'hover:bg-white/20 text-white' 
+              : 'hover:bg-black/10 text-black'
+          }`}
         >
-          <Menu className="h-6 w-6 text-white" />
+          <Menu className="h-6 w-6" />
         </button>
       )}
 

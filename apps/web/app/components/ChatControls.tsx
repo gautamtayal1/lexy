@@ -22,6 +22,7 @@ const ChatControls = ({
 }: ChatControlsProps) => {
   const dispatch = useAppDispatch();
   const { selectedModel, isCreativeMode, attachedFiles } = useAppSelector((state) => state.chat);
+  const theme = useAppSelector((state) => state.theme.theme);
 
   const handleModelChange = (model: string) => {
     dispatch(setSelectedModel(model));
@@ -63,16 +64,26 @@ const ChatControls = ({
   };
 
   return (
-    <div className="backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-3 transition-all duration-300 ease-in-out">
+    <div className={`backdrop-blur-xl rounded-3xl shadow-xl border p-3 transition-all duration-300 ease-in-out ${
+      theme === 'dark' 
+        ? 'border-white/30' 
+        : 'border-black/30'
+    }`}>
       {/* File Preview */}
       {attachedFiles.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {attachedFiles.map(file => (
-            <div key={file.id} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1 text-sm text-white border border-white/20">
+            <div key={file.id} className={`flex items-center gap-2 rounded-lg px-3 py-1 text-sm border ${
+              theme === 'dark' 
+                ? 'bg-white/10 text-white border-white/20' 
+                : 'bg-black/10 text-black border-black/20'
+            }`}>
               <span className="truncate max-w-32">{file.name}</span>
               <button 
                 onClick={() => handleRemoveFile(file.id)}
-                className="hover:text-red-300 transition-colors text-xs"
+                className={`transition-colors text-xs ${
+                  theme === 'dark' ? 'hover:text-red-300' : 'hover:text-red-500'
+                }`}
               >
                 ×
               </button>
@@ -81,7 +92,7 @@ const ChatControls = ({
         </div>
       )}
 
-      {/* Input Area - Exact copy from ChatInput */}
+      {/* Input Area */}
       <div className="relative mb-2">
         <textarea
           value={input}
@@ -98,7 +109,11 @@ const ChatControls = ({
             }
           }}
           placeholder={placeholder}
-          className="w-full text-white placeholder-white/50 rounded-xl py-2 px-4 pr-12 text-base focus:outline-none resize-none overflow-hidden min-h-[48px]"
+          className={`w-full rounded-xl py-2 px-4 pr-12 text-base focus:outline-none resize-none overflow-hidden min-h-[48px] ${
+            theme === 'dark' 
+              ? 'text-white placeholder-white/50' 
+              : 'text-black placeholder-black/50'
+          }`}
           rows={1}
           style={{ 
             minHeight: '48px',
@@ -107,18 +122,24 @@ const ChatControls = ({
         />
       </div>
 
-      {/* Controls Row - Exact copy from ChatControls */}
+      {/* Controls Row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <button
-            className={`bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl flex items-center gap-2 ${isCreativeMode ? 'bg-white/20' : ''}`}
+            className={`border rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl flex items-center gap-2 ${
+              theme === 'dark' 
+                ? `bg-white/10 hover:bg-white/20 text-white border-white/20 ${isCreativeMode ? 'bg-white/20' : ''}`
+                : `bg-black/10 hover:bg-black/20 text-black border-black/20 ${isCreativeMode ? 'bg-black/20' : ''}`
+            }`}
             onClick={handleToggleCreativeMode}
           >
             <Sparkles className="h-4 w-4" />
             Creative
           </button>
           
-          <button className="text-white rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors">    
+          <button className={`rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
+            theme === 'dark' ? 'text-white' : 'text-black'
+          }`}>    
             <UploadButton
               endpoint="imageUploader"
               onUploadBegin={(name) => {
@@ -131,7 +152,9 @@ const ChatControls = ({
                 alert(`ERROR! ${error.message}`);
               }}
               appearance={{
-                button: "bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl",
+                button: theme === 'dark' 
+                  ? "bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl"
+                  : "bg-black/10 hover:bg-black/20 text-black border border-black/20 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl",
                 container: "flex items-center",
                 allowedContent: "hidden"
               }}
@@ -146,7 +169,11 @@ const ChatControls = ({
         <div className="flex items-center gap-3">
           <ModelDropdown selectedModel={selectedModel} onModelChange={handleModelChange} />
           <button  
-            className="bg-white/20 hover:bg-white/30 text-white transition-all duration-200 p-3 rounded-xl" 
+            className={`transition-all duration-200 p-3 rounded-xl ${
+              theme === 'dark' 
+                ? 'bg-white/20 hover:bg-white/30 text-white' 
+                : 'bg-black/20 hover:bg-black/30 text-black'
+            }`}
             onClick={onSubmit}
           >
             <ArrowBigUp className="h-5 w-5" />

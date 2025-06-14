@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useAppSelector } from '../store/hooks';
 
 interface ModelDropdownProps {
   selectedModel: string;
@@ -9,6 +10,7 @@ interface ModelDropdownProps {
 const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const theme = useAppSelector((state) => state.theme.theme);
 
   const models = [
     { id: "openai/gpt-4.1-mini", name: "GPT-4.1" },
@@ -37,14 +39,22 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 text-white rounded-lg px-3 py-1.5 text-lg font-medium tracking-wide hover:bg-white/10 transition-colors"
+        className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-lg font-medium tracking-wide transition-colors ${
+          theme === 'dark' 
+            ? 'text-white hover:bg-white/10' 
+            : 'text-black hover:bg-black/10'
+        }`}
       >
         {models.find(m => m.id === selectedModel)?.name}
         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full mb-2 right-0 w-48 bg-slate-900 backdrop-blur-xl rounded-lg shadow-lg border border-white/20 overflow-hidden">
+        <div className={`absolute bottom-full mb-2 right-0 w-48 backdrop-blur-xl rounded-lg shadow-lg border overflow-hidden ${
+          theme === 'dark' 
+            ? 'bg-slate-900 border-white/20' 
+            : 'bg-white/90 border-black/20'
+        }`}>
           {models.map((model) => (
             <button
               key={model.id}
@@ -52,8 +62,10 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                 onModelChange(model.id);
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-4 py-2 text-sm font-medium tracking-wide text-white hover:bg-white/20 transition-colors ${
-                selectedModel === model.id ? 'bg-white/20' : ''
+              className={`w-full text-left px-4 py-2 text-sm font-medium tracking-wide transition-colors ${
+                theme === 'dark'
+                  ? `text-white hover:bg-white/20 ${selectedModel === model.id ? 'bg-white/20' : ''}`
+                  : `text-black hover:bg-black/10 ${selectedModel === model.id ? 'bg-black/10' : ''}`
               }`}
             >
               {model.name}

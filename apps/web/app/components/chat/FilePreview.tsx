@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useAppSelector } from '../../store/hooks';
 
 interface UploadedFile {
   name: string;
@@ -18,21 +19,37 @@ interface FilePreviewProps {
 }
 
 export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreviewProps) {
+  const theme = useAppSelector((state) => state.theme.theme);
+  
   if (uploadedFiles.length === 0) return null;
 
   return (
     <div className="mb-4 animate-in slide-in-from-bottom-2 duration-300">
-      <div className="flex flex-wrap gap-3 p-3 bg-white/5 rounded-2xl border border-white/10">
+      <div className={`flex flex-wrap gap-3 p-3 rounded-2xl border ${
+        theme === 'dark' 
+          ? 'bg-white/5 border-white/10' 
+          : 'bg-black/5 border-black/10'
+      }`}>
         {uploadedFiles.map((uploadedFile, index) => (
           <div 
             key={index}
             className="relative group animate-in fade-in-0 zoom-in-95 duration-200"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="relative bg-white/10 rounded-xl border border-white/20 p-2 hover:bg-white/20 transition-all duration-200">
+            <div className={`relative rounded-xl border p-2 transition-all duration-200 ${
+              theme === 'dark' 
+                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
+                : 'bg-black/10 border-black/20 hover:bg-black/20'
+            }`}>
               {uploadedFile.isUploading ? (
-                <div className="w-16 h-16 flex items-center justify-center rounded-lg bg-white/10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white"></div>
+                <div className={`w-16 h-16 flex items-center justify-center rounded-lg ${
+                  theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
+                }`}>
+                  <div className={`animate-spin rounded-full h-8 w-8 border-2 ${
+                    theme === 'dark' 
+                      ? 'border-white/30 border-t-white' 
+                      : 'border-black/30 border-t-black'
+                  }`}></div>
                 </div>
               ) : uploadedFile.type?.startsWith('image/') ? (
                 <img 
@@ -41,8 +58,12 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
                   className="w-16 h-16 object-cover rounded-lg"
                 />
               ) : (
-                <div className="w-16 h-16 flex items-center justify-center rounded-lg bg-white/10">
-                  <span className="text-white text-xs font-medium">
+                <div className={`w-16 h-16 flex items-center justify-center rounded-lg ${
+                  theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
+                }`}>
+                  <span className={`text-xs font-medium ${
+                    theme === 'dark' ? 'text-white' : 'text-black'
+                  }`}>
                     {uploadedFile.name?.split('.').pop()?.toUpperCase() || 'FILE'}
                   </span>
                 </div>
@@ -58,7 +79,9 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
               )}
             </div>
             
-            <p className="text-xs text-white/70 mt-1 text-center truncate max-w-16">
+            <p className={`text-xs mt-1 text-center truncate max-w-16 ${
+              theme === 'dark' ? 'text-white/70' : 'text-black/70'
+            }`}>
               {uploadedFile.isUploading ? 'Uploading...' : uploadedFile.name}
             </p>
           </div>

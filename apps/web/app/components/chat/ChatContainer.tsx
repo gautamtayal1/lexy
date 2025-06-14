@@ -5,6 +5,7 @@ import MessageList from './MessageList';
 import FilePreview from './FilePreview';
 import ChatInput from './ChatInput';
 import ChatControls from './ChatControls';
+import { useAppSelector } from '../../store/hooks';
 
 interface Message {
   id: string;
@@ -58,12 +59,18 @@ export default function ChatContainer({
   onFileUploadStart,
   status
 }: ChatContainerProps) {
+  const theme = useAppSelector((state) => state.theme.theme);
+
   return (
     <>
       <MessageList messages={messages} messagesEndRef={messagesEndRef} status={status} />
       
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
-        <div className="backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-3 transition-all duration-300 ease-in-out">
+        <div className={`backdrop-blur-xl rounded-3xl shadow-xl border p-3 transition-all duration-300 ease-in-out ${
+          theme === 'dark' 
+            ? 'border-white/30' 
+            : 'border-black/30'
+        }`}>
           <FilePreview uploadedFiles={uploadedFiles} onRemoveFile={onRemoveFile} />
           
           <ChatInput 

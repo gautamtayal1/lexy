@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import MessageFormatter from '../MessageFormatter';
+import { useAppSelector } from '../../store/hooks';
 
 interface Message {
   id: string;
@@ -22,6 +23,7 @@ interface MessageListProps {
 export default function MessageList({ messages, messagesEndRef, status }: MessageListProps) {
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
   const [copiedMessages, setCopiedMessages] = useState<Record<string, boolean>>({});
+  const theme = useAppSelector((state) => state.theme.theme);
 
   const toggleReasoning = (messageId: string) => {
     setExpandedReasonings(prev => ({
@@ -67,7 +69,11 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                 <div className="mb-2">
                   <button
                     onClick={() => toggleReasoning(message.id || message.messageId || '')}
-                    className="flex items-center gap-2 text-white/70 hover:text-white text-base transition-colors"
+                    className={`flex items-center gap-2 text-base transition-colors ${
+                      theme === 'dark' 
+                        ? 'text-white/70 hover:text-white' 
+                        : 'text-black/70 hover:text-black'
+                    }`}
                   >
                     {expandedReasonings[message.id || message.messageId || ''] ? (
                       <ChevronUp className="h-5 w-5" />
@@ -77,7 +83,11 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                     Show Reasoning
                   </button>
                   {expandedReasonings[message.id || message.messageId || ''] && (
-                    <div className="mt-3 p-4 bg-white/5 rounded-lg text-white/80 text-base leading-relaxed">
+                    <div className={`mt-3 p-4 rounded-lg text-base leading-relaxed ${
+                      theme === 'dark' 
+                        ? 'bg-white/5 text-white/80' 
+                        : 'bg-black/5 text-black/80'
+                    }`}>
                       {message.reasoning}
                     </div>
                   )}
@@ -87,10 +97,16 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div 
-                  className={`rounded-2xl px-6 py-3 text-white text-base leading-relaxed ${
+                  className={`rounded-2xl px-6 py-3 text-base leading-relaxed ${
                     message.role === 'user' 
-                      ? 'bg-white/10 max-w-[70%]' 
-                      : 'w-full'
+                      ? `max-w-[70%] ${
+                          theme === 'dark' 
+                            ? 'bg-white/10 text-white' 
+                            : 'bg-black/10 text-black'
+                        }` 
+                      : `w-full ${
+                          theme === 'dark' ? 'text-white' : 'text-black'
+                        }`
                   }`}
                 >
                   {message.role === 'assistant' ? (
@@ -106,7 +122,11 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                 <div className="flex justify-start ml-5">
                   <button
                     onClick={() => copyMessage(message.id || message.messageId || '', message.content)}
-                    className="flex items-center gap-2 text-white/50 hover:text-white/80 text-sm transition-colors px-2 py-1 rounded-lg hover:bg-white/5"
+                    className={`flex items-center gap-2 text-sm transition-colors px-2 py-1 rounded-lg ${
+                      theme === 'dark' 
+                        ? 'text-white/50 hover:text-white/80 hover:bg-white/5' 
+                        : 'text-black/50 hover:text-black/80 hover:bg-black/5'
+                    }`}
                   >
                     {copiedMessages[message.id || message.messageId || ''] ? (
                       <>
@@ -128,12 +148,22 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
         {/* Show loading indicator only when waiting for content to start */}
         {shouldShowLoading && (
           <div className="flex justify-start mb-6">
-            <div className="rounded-2xl px-6 py-3 text-white text-base leading-relaxed w-full">
-              <div className="flex items-center gap-2 text-white/70">
+            <div className={`rounded-2xl px-6 py-3 text-base leading-relaxed w-full ${
+              theme === 'dark' ? 'text-white' : 'text-black'
+            }`}>
+              <div className={`flex items-center gap-2 ${
+                theme === 'dark' ? 'text-white/70' : 'text-black/70'
+              }`}>
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className={`w-2 h-2 rounded-full animate-bounce ${
+                    theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
+                  }`} style={{ animationDelay: '0ms' }}></div>
+                  <div className={`w-2 h-2 rounded-full animate-bounce ${
+                    theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
+                  }`} style={{ animationDelay: '150ms' }}></div>
+                  <div className={`w-2 h-2 rounded-full animate-bounce ${
+                    theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
+                  }`} style={{ animationDelay: '300ms' }}></div>
                 </div>
                 <span className="text-sm">
                 </span>

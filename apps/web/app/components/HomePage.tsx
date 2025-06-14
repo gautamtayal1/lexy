@@ -16,6 +16,7 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const [input, setInput] = useState("");
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.theme.theme);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,13 +44,23 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   ];
 
   return (
-    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border border-white/20 bg-white/5 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'left-[24rem]' : 'left-8'}`}>
+    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border flex flex-col transition-all duration-300 ${
+      isSidebarOpen ? 'left-[24rem]' : 'left-8'
+    } ${
+      theme === 'dark' 
+        ? 'border-white/20 bg-white/5' 
+        : 'border-black/20 bg-black/5'
+    }`}>
       {!isSidebarOpen && (
         <button 
           onClick={onToggleSidebar}
-          className="absolute -left-12 top-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+          className={`absolute -left-12 top-4 p-2 rounded-lg transition-colors ${
+            theme === 'dark' 
+              ? 'hover:bg-white/20 text-white' 
+              : 'hover:bg-black/10 text-black'
+          }`}
         >
-          <Menu className="h-6 w-6 text-white" />
+          <Menu className="h-6 w-6" />
         </button>
       )}
 
@@ -60,7 +71,11 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
               <h2 
                 key={index}
                 onClick={() => handleQuestionClick(question)}
-                className="text-xl text-white cursor-pointer hover:text-white/80 transition-colors"
+                className={`text-xl cursor-pointer transition-colors ${
+                  theme === 'dark' 
+                    ? 'text-white hover:text-white/80' 
+                    : 'text-black hover:text-black/70'
+                }`}
               >
                 {question}
               </h2>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useAppSelector } from '../../store/hooks';
 
 interface ChatInputProps {
   input: string;
@@ -9,6 +10,8 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ input, onInputChange, onSubmit }: ChatInputProps) {
+  const theme = useAppSelector((state) => state.theme.theme);
+
   return (
     <div className="relative mb-2">
       <textarea
@@ -26,7 +29,11 @@ export default function ChatInput({ input, onInputChange, onSubmit }: ChatInputP
           }
         }}
         placeholder="Type your message..."
-        className="w-full text-white placeholder-white/50 rounded-xl py-2 px-4 pr-12 text-base focus:outline-none resize-none overflow-hidden min-h-[48px]"
+        className={`w-full rounded-xl py-2 px-4 pr-12 text-base focus:outline-none resize-none overflow-hidden min-h-[48px] ${
+          theme === 'dark' 
+            ? 'text-white placeholder-white/50' 
+            : 'text-black placeholder-black/50'
+        }`}
         rows={1}
         style={{ 
           minHeight: '48px',

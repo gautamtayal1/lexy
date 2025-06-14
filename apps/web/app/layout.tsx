@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "./ConvexProviderWithClerk";
 
 import { ReduxProvider } from "./providers/ReduxProvider";
+import ThemeBackground from "./components/ThemeBackground";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,21 +22,15 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div className="relative w-screen h-screen">
-          <Image 
-            src="/neww.jpg" 
-            alt="background" 
-            fill
-            className="object-cover"
-            priority
-          />
-          <ClerkProvider
-            signInUrl="/sign-in"
-            signUpUrl="/sign-up"
-          >
-            <ReduxProvider>
+          <ReduxProvider>
+            <ThemeBackground />
+            <ClerkProvider
+              signInUrl="/sign-in"
+              signUpUrl="/sign-up"
+            >
               <ConvexClientProvider>{children}</ConvexClientProvider>
-            </ReduxProvider>
-          </ClerkProvider>
+            </ClerkProvider>
+          </ReduxProvider>
         </div>
       </body>
     </html>
