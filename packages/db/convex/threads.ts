@@ -109,3 +109,36 @@ export const getThreadDetails = query({
   },
 })
 
+export const deleteThread = mutation({
+  args: {
+    userId: v.string(),
+    threadId: v.string(),
+  },
+  handler: async(ctx, { userId, threadId }) => {
+    const thread = await ctx.db
+      .query("threads")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("threadId"), threadId))
+      .unique();
+
+    if (!thread) {
+      throw new Error("Thread not found");
+    }
+
+    // Delete all messages in this thread
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
+      .collect();
+
+    for (const message of messages) {
+      await ctx.db.delete(message._id);
+    }
+
+    // Delete the thread
+    await ctx.db.delete(thread._id);
+
+    return true;
+  },
+})
+

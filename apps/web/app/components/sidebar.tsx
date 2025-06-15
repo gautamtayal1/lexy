@@ -1,9 +1,9 @@
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
-import { Authenticated, Unauthenticated, useQuery } from 'convex/react';
-import { MenuIcon, PlusIcon, Settings } from 'lucide-react';
+import { Authenticated, Unauthenticated, useQuery, useMutation } from 'convex/react';
+import { MenuIcon, PlusIcon, Settings, Share2, Trash2, Copy, Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@repo/db/convex/_generated/api';
 import { useAppSelector } from '../store/hooks';
@@ -12,15 +12,19 @@ import ThemeToggle from './ThemeToggle';
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  onShareChat?: (threadId: string, title: string) => void;
 }
 
-const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
+const Sidebar = ({ isOpen, onToggle, onShareChat }: SidebarProps) => {
   const { user } = useUser();
   const router = useRouter();
   const threads = useQuery(api.threads.getThread, {
     userId: user?.id || ""
   });
   const theme = useAppSelector((state) => state.theme.theme);
+
+
+  const deleteThread = useMutation(api.threads.deleteThread);
 
   const handleNewChat = () => {
     router.push('/');
@@ -32,6 +36,25 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
 
   const handleSettingsClick = () => {
     router.push('/settings');
+  };
+
+  const handleDeleteThread = async (threadId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      await deleteThread({
+        threadId,
+        userId: user.id,
+      });
+    } catch (error) {
+      console.error('Failed to delete thread:', error);
+    }
+  };
+
+  const handleShareClick = (threadId: string, title: string) => {
+    if (onShareChat) {
+      onShareChat(threadId, title);
+    }
   };
 
   return (
@@ -85,18 +108,52 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         }`}>Recent Chats</h2>
         <div>
           {threads?.slice().reverse().map((thread) => (
-            <div 
-              key={thread.threadId}
-              onClick={() => handleThreadClick(thread.threadId)}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                theme === 'dark' 
-                  ? 'hover:bg-white/20' 
-                  : 'hover:bg-black/10'
-              }`}
-            >
-              <p className={`text-sm font-medium ${
-                theme === 'dark' ? 'text-white' : 'text-black'
-              }`}>{thread.title}</p>
+            <div key={thread.threadId} className="relative">
+              <div 
+                onClick={() => handleThreadClick(thread.threadId)}
+                className={`p-3 rounded-lg cursor-pointer transition-colors flex items-center justify-between group ${
+                  theme === 'dark' 
+                    ? 'hover:bg-white/20' 
+                    : 'hover:bg-black/10'
+                }`}
+              >
+                <p className={`text-sm font-medium flex-1 ${
+                  theme === 'dark' ? 'text-white' : 'text-black'
+                }`}>{thread.title}</p>
+                
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShareClick(thread.threadId, thread.title);
+                    }}
+                    className={`p-1.5 rounded transition-colors ${
+                      theme === 'dark' 
+                        ? 'hover:bg-white/20 text-white/70 hover:text-white' 
+                        : 'hover:bg-black/20 text-black/70 hover:text-black'
+                    }`}
+                    title="Share chat"
+                  >
+                    <Share2 className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteThread(thread.threadId);
+                    }}
+                    className={`p-1.5 rounded transition-colors ${
+                      theme === 'dark' 
+                        ? 'hover:bg-red-500/20 text-red-400 hover:text-red-300' 
+                        : 'hover:bg-red-500/20 text-red-600 hover:text-red-500'
+                    }`}
+                    title="Delete chat"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+
+
             </div>
           ))}
         </div>

@@ -12,14 +12,16 @@ import axios from 'axios';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
 import ChatContainer from './chat/ChatContainer';
-import ShareButton from './chat/ShareButton';
+import ShareModal from './chat/ShareModal';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
+  shareModalData?: { threadId: string; title: string } | null;
+  onCloseShareModal?: () => void;
 }
 
-const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
+const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShareModal }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -222,34 +224,33 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
           </button>
         )}
 
-        <ChatContainer
-          messages={displayMessages as any}
-          messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
-          uploadedFiles={uploadedFiles}
-          onRemoveFile={handleRemoveFile}
-          input={input}
-          onInputChange={handleInputChange}
-          onSubmit={handleSubmitWithCleanup}
-          isCreativeMode={finalIsCreativeMode}
-          onToggleCreativeMode={handleToggleCreativeMode}
-          selectedModel={selectedModel}
-          onModelChange={handleModelChange}
-          onFileUpload={handleFileUpload}
-          onFileUploadStart={handleFileUploadStart}
-          status={status}
-        />
-      </div>
+              <ChatContainer
+        messages={displayMessages as any}
+        messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
+        uploadedFiles={uploadedFiles}
+        onRemoveFile={handleRemoveFile}
+        input={input}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmitWithCleanup}
+        isCreativeMode={finalIsCreativeMode}
+        onToggleCreativeMode={handleToggleCreativeMode}
+        selectedModel={selectedModel}
+        onModelChange={handleModelChange}
+        onFileUpload={handleFileUpload}
+        onFileUploadStart={handleFileUploadStart}
+        status={status}
+      />
 
-      {/* Share Button - Outside the clipped area */}
-      {threadDetails && displayMessages.length > 0 && (
-        <div className={`fixed top-12 z-20 transition-all duration-300 ${
-          isSidebarOpen ? 'right-12' : 'right-12'
-        }`}>
-          <ShareButton 
-            threadId={threadId!} 
-            threadTitle={threadDetails.title} 
-          />
-        </div>
+
+    </div>
+
+      {/* Share Modal */}
+      {shareModalData && onCloseShareModal && (
+        <ShareModal
+          threadId={shareModalData.threadId}
+          threadTitle={shareModalData.title}
+          onClose={onCloseShareModal}
+        />
       )}
     </div>
   );

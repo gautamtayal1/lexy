@@ -33,7 +33,7 @@ export default function ChatControls({
         <button
           className={`border rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl flex items-center gap-2 ${
             theme === 'dark' 
-              ? `bg-white/10 hover:bg-white/20 text-white border-white/20 ${isCreativeMode ? 'bg-white/20' : ''}`
+              ? `bg-white/10 hover:bg-white/20 text-white border-white/20 ${isCreativeMode ? 'bg-white/20' : 'bg-pink-600'}`
               : `bg-black/10 hover:bg-black/20 text-black border-black/20 ${isCreativeMode ? 'bg-black/20' : ''}`
           }`}
           onClick={onToggleCreativeMode}
