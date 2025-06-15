@@ -124,35 +124,44 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
 
   // Handler functions for the modular components
   const handleRemoveFile = (index: number) => {
+    const fileToRemove = uploadedFiles[index];
+    
+    // Remove from preview
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-    if (uploadedFiles.length === 1) {
-      setFile(null);
-    }
+    
+    // Remove from API file state by matching URL and name
+    setFile((prevFiles: any) => {
+      if (!prevFiles) return null;
+      const updatedFiles = prevFiles.filter((f: any) => 
+        !(f.url === fileToRemove.url && f.name === fileToRemove.name)
+      );
+      return updatedFiles.length > 0 ? updatedFiles : null;
+    });
   };
 
   const handleFileUploadStart = (files: any[]) => {
-    // Add loading file to preview immediately
+    // Add loading files to preview immediately
     setUploadedFiles(prev => [...prev, ...files]);
+    console.log("Upload start, loading files:", files);
   };
 
   const handleFileUpload = (files: any[]) => {
-    const newFile = files;
-    setFile(newFile);
-  
-    // Replace the loading file with the actual uploaded file
-    setUploadedFiles(prev => {
-      const newFiles = [...prev];
-      // Find the loading file and replace it
-      const loadingIndex = newFiles.findIndex(f => f.isUploading);
-      if (loadingIndex !== -1) {
-        newFiles[loadingIndex] = newFile;
-      } else {
-        // If no loading file found, just add the new file
-        newFiles.push(newFile);
-      }
-      return newFiles;
+    // Accumulate all uploaded files, not just replace with the latest batch
+    setFile((prev: any) => {
+      const currentFiles = prev || [];
+      const newAllFiles = [...currentFiles, ...files];
+      console.log("Accumulating files for API:", { currentFiles, newFiles: files, totalFiles: newAllFiles });
+      return newAllFiles;
     });
-    console.log("Files: ", files);
+  
+    // Replace the loading files with the actual uploaded files
+    setUploadedFiles(prev => {
+      // Remove all loading files and add the actual uploaded files
+      const nonLoadingFiles = prev.filter(f => !f.isUploading);
+      console.log("Replacing loading files with uploaded files:", { nonLoadingFiles, files });
+      return [...nonLoadingFiles, ...files];
+    });
+    console.log("Upload complete, new files:", files);
   };
 
   const handleSubmitWithCleanup = () => {

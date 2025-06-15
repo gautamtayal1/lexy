@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       for (const attachment of attachmentArray) {
         await convex.mutation(api.attachments.addAttachment, {
           userId,
-          messageId: assistantMessageId,
+          messageId: userMessageId, // Fix: Attach to user message, not assistant message
           attachmentUrl: attachment.url,
           fileName: attachment.name,
           fileType: attachment.type,
@@ -241,11 +241,11 @@ export async function POST(request: NextRequest) {
                   type: "text",
                   text: messages[messages.length - 1].content,
                 },
-                {
+                ...(attachments.map((attachment: any) => ({
                   type: "image",
-                  image: attachments.serverData.fileUrl,
-                  mimeType: attachments.type,
-                },
+                  image: attachment.url,
+                  mimeType: attachment.type,
+                }))),
               ],
             },
           ]

@@ -21,6 +21,8 @@ interface FilePreviewProps {
 export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreviewProps) {
   const theme = useAppSelector((state) => state.theme.theme);
   
+  console.log('FilePreview uploadedFiles:', uploadedFiles);
+  
   if (uploadedFiles.length === 0) return null;
 
   return (
@@ -30,7 +32,16 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
           ? 'bg-white/5 border-white/10' 
           : 'bg-black/5 border-black/10'
       }`}>
-        {uploadedFiles.map((uploadedFile, index) => (
+        {uploadedFiles.map((uploadedFile, index) => {
+          console.log(`File ${index}:`, {
+            name: uploadedFile.name,
+            type: uploadedFile.type,
+            url: uploadedFile.url,
+            isUploading: uploadedFile.isUploading,
+            isImage: uploadedFile.type?.startsWith('image/')
+          });
+          
+          return (
           <div 
             key={index}
             className="relative group animate-in fade-in-0 zoom-in-95 duration-200"
@@ -42,7 +53,7 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
                 : 'bg-black/10 border-black/20 hover:bg-black/20'
             }`}>
               {uploadedFile.isUploading ? (
-                <div className={`w-16 h-16 flex items-center justify-center rounded-lg ${
+                <div className={`w-20 h-20 flex items-center justify-center rounded-lg ${
                   theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
                 }`}>
                   <div className={`animate-spin rounded-full h-8 w-8 border-2 ${
@@ -55,13 +66,15 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
                 <img 
                   src={uploadedFile.url} 
                   alt={uploadedFile.name}
-                  className="w-16 h-16 object-cover rounded-lg"
+                  className="w-20 h-20 object-cover rounded-lg"
+                  onError={(e) => console.log('Image load error:', e, 'File:', uploadedFile)}
+                  onLoad={() => console.log('Image loaded successfully:', uploadedFile)}
                 />
               ) : (
-                <div className={`w-16 h-16 flex items-center justify-center rounded-lg ${
+                <div className={`w-20 h-20 flex items-center justify-center rounded-lg ${
                   theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
                 }`}>
-                  <span className={`text-xs font-medium ${
+                  <span className={`text-xs font-medium text-center ${
                     theme === 'dark' ? 'text-white' : 'text-black'
                   }`}>
                     {uploadedFile.name?.split('.').pop()?.toUpperCase() || 'FILE'}
@@ -79,13 +92,14 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
               )}
             </div>
             
-            <p className={`text-xs mt-1 text-center truncate max-w-16 ${
+            <p className={`text-xs mt-1 text-center truncate max-w-20 ${
               theme === 'dark' ? 'text-white/70' : 'text-black/70'
             }`}>
               {uploadedFile.isUploading ? 'Uploading...' : uploadedFile.name}
             </p>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

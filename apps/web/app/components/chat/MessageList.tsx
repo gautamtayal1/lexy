@@ -96,7 +96,7 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                 </div>
               )}
               <div 
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
               >
                 <div 
                   className={`rounded-2xl px-6 py-3 text-base leading-relaxed ${
@@ -116,12 +116,12 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                   ) : (
                     message.content
                   )}
-                  
-                  {/* Render attachments for this message */}
-                  {(message.id) && (
-                    <AttachmentList messageId={message.id} />
-                  )}
                 </div>
+                
+                {/* Render attachments for this message */}
+                {(message.id || message.messageId) && (
+                  <AttachmentList messageId={(message.id || message.messageId)!} messageRole={message.role} />
+                )}
               </div>
               
               {/* Copy button for assistant messages - only show when not streaming */}
