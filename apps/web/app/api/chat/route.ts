@@ -5,6 +5,8 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 import { createGroq } from "@ai-sdk/groq";
 import { openai } from "@ai-sdk/openai";
+import { createPartFromUri, createUserContent, GoogleGenAI, Modality } from "@google/genai";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "edge";
 
@@ -22,6 +24,18 @@ const openrouterModels = [
   "google/gemini-2.0-flash-exp:free",
   "google/gemini-2.5-pro-preview",
 ]
+
+const apiKey = process.env.VERTEX_API_KEY;
+
+// Configure DO Spaces client
+const s3Client = new S3Client({
+  endpoint: `https://${process.env.DO_SPACES_REGION}.digitaloceanspaces.com`,
+  region: process.env.DO_SPACES_REGION,
+  credentials: {
+    accessKeyId: process.env.DO_SPACES_KEY!,
+    secretAccessKey: process.env.DO_SPACES_SECRET!,
+  },
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,7 +90,6 @@ export async function POST(request: NextRequest) {
       threadId,
       messageId: assistantMessageId,
       role: "assistant",
-      // Will be patched with the full text when the stream finishes.
       content: "",
       model,
       status: "thinking",
@@ -97,27 +110,60 @@ export async function POST(request: NextRequest) {
     }
 
     if (model === "gpt-image-1") {
-      const { image } = await generateImage({
-        model: openai.image('gpt-image-1'),
-        prompt: 'Santa Claus driving a Cadillac',
+      // const { image } = await generateImage({
+      //   model: openai.image('gpt-image-1'),
+      //   model: vertexai.image('gemini-2.0-flash-exp'),
+      //   prompt: 'Santa Claus driving a Cadillac',
+      // });
+
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash-preview-image-generation",
+        contents: messages[messages.length - 1].content,
+        config: {
+          responseModalities: [Modality.TEXT, Modality.IMAGE]
+        }
       });
-
-    const response = await fetch('/api/uploadthing', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        image: image,
-        fileName: 'generated-image.png',
-        fileType: 'image/png',
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload generated image');
-    }
-    console.log('image', image)
+      for (const part of response.candidates?.[0]?.content?.parts ?? []) {
+        // Based on the part type, either show the text or save the image
+        if (part.text) {
+          console.log(part.text);
+        } else if (part.inlineData) {
+          const imageData = part.inlineData.data;
+          if (imageData) {
+            const buffer = Buffer.from(imageData, "base64");
+            const fileName = `generated-images/${crypto.randomUUID()}.png`;
+            
+            try {
+              await s3Client.send(new PutObjectCommand({
+                Bucket: process.env.DO_SPACES_BUCKET!,
+                Key: fileName,
+                Body: buffer,
+                ContentType: 'image/png',
+                ACL: 'public-read',
+              }));
+              
+              const imageUrl = `https://${process.env.DO_SPACES_BUCKET}.${process.env.DO_SPACES_REGION}.cdn.digitaloceanspaces.com/${fileName}`;
+              console.log('Image uploaded to DO Spaces:', imageUrl);
+              
+              // Store image URL in attachment
+              await convex.mutation(api.attachments.addAttachment, {
+                userId,
+                messageId: assistantMessageId,
+                attachmentUrl: imageUrl,
+                fileName: 'generated-image.png',
+                fileType: 'image/png',
+                fileSize: buffer.length,
+                fileKey: fileName,
+                attachmentId: crypto.randomUUID(),
+              });
+              
+            } catch (error) {
+              console.error('Failed to upload image to DO Spaces:', error);
+            }
+          }
+        }
+      }
     }
 
 
