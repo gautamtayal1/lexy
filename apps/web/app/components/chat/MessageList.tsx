@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import MessageFormatter from '../MessageFormatter';
+import AttachmentList from './AttachmentList';
 import { useAppSelector } from '../../store/hooks';
 
 interface Message {
@@ -62,6 +63,7 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
         {messages.map((message, index) => {
           const isLastMessage = index === messages.length - 1;
           const isStreamingThisMessage = isStreamingAssistantMessage && isLastMessage;
+          console.log('message', message)
           
           return (
             <div key={message.id || message.messageId} className="space-y-2 mb-6">
@@ -113,6 +115,11 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
                     <MessageFormatter content={message.content} />
                   ) : (
                     message.content
+                  )}
+                  
+                  {/* Render attachments for this message */}
+                  {(message.id) && (
+                    <AttachmentList messageId={message.id} />
                   )}
                 </div>
               </div>

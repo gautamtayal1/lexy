@@ -56,6 +56,8 @@ export async function POST(request: NextRequest) {
       attachments: any;
       apiKeys?: {
         openrouter?: string;
+        openai?: string;
+        gemini?: string;
       };
     } = await request.json();
 
@@ -88,12 +90,12 @@ export async function POST(request: NextRequest) {
     await convex.mutation(api.messages.addMessage, {
       userId,
       threadId,
-      messageId: assistantMessageId,
       role: "assistant",
       content: "",
       model,
       status: "thinking",
       modelParams,
+      messageId: assistantMessageId,
     })
     
     if (attachments) {
@@ -109,13 +111,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (model === "gpt-image-1") {
-      // const { image } = await generateImage({
-      //   model: openai.image('gpt-image-1'),
-      //   model: vertexai.image('gemini-2.0-flash-exp'),
-      //   prompt: 'Santa Claus driving a Cadillac',
-      // });
-
+    if (model ==="gemini-2.0-flash-preview-image-generation") {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-2.0-flash-preview-image-generation",
@@ -135,7 +131,7 @@ export async function POST(request: NextRequest) {
             const fileName = `generated-images/${crypto.randomUUID()}.png`;
             
             try {
-              await s3Client.send(new PutObjectCommand({
+              const result = await s3Client.send(new PutObjectCommand({
                 Bucket: process.env.DO_SPACES_BUCKET!,
                 Key: fileName,
                 Body: buffer,
@@ -143,10 +139,11 @@ export async function POST(request: NextRequest) {
                 ACL: 'public-read',
               }));
               
-              const imageUrl = `https://${process.env.DO_SPACES_BUCKET}.${process.env.DO_SPACES_REGION}.cdn.digitaloceanspaces.com/${fileName}`;
+              const imageUrl = `https://${process.env.DO_SPACES_BUCKET}.${process.env.DO_SPACES_REGION}.digitaloceanspaces.com/${fileName}`;
               console.log('Image uploaded to DO Spaces:', imageUrl);
+              console.log('result', result);
+              console.log('fileName used as key:', fileName);
               
-              // Store image URL in attachment
               await convex.mutation(api.attachments.addAttachment, {
                 userId,
                 messageId: assistantMessageId,
@@ -166,6 +163,46 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (model === "gpt-image-1") {
+      const { image } = await generateImage({
+        model: openai.image('gpt-image-1'),
+        prompt: messages[messages.length - 1].content,
+      });
+      const imageData = image.base64
+      if (imageData) {
+        const buffer = Buffer.from(imageData, "base64");
+        const fileName = `generated-images/${crypto.randomUUID()}.png`;
+        
+        try {
+          const result = await s3Client.send(new PutObjectCommand({
+            Bucket: process.env.DO_SPACES_BUCKET!,
+            Key: fileName,
+            Body: buffer,
+            ContentType: 'image/png',
+            ACL: 'public-read',
+          }));
+          
+          const imageUrl = `https://${process.env.DO_SPACES_BUCKET}.${process.env.DO_SPACES_REGION}.digitaloceanspaces.com/${fileName}`;
+          console.log('Image uploaded to DO Spaces:', imageUrl);
+          console.log('result', result);
+          console.log('fileName used as key:', fileName);
+          
+          await convex.mutation(api.attachments.addAttachment, {
+            userId,
+            messageId: assistantMessageId,
+            attachmentUrl: imageUrl,
+            fileName: 'generated-image.png',
+            fileType: 'image/png',
+            fileSize: buffer.length,
+            fileKey: fileName,
+            attachmentId: crypto.randomUUID(),
+          });
+          
+        } catch (error) {
+          console.error('Failed to upload image to DO Spaces:', error);
+        }
+      }
+    }
 
     // Create AI providers
     let aiProvider;
@@ -233,7 +270,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error("Error in chat route:", error);
-    return new Response("Internal Server Error", { status: 500 });
+    console.error('Chat API error:', error);
+    return new Response("Internal server error", { status: 500 });
   }
 }

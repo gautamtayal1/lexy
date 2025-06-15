@@ -21,7 +21,8 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0" },
     { id: "google/gemini-2.5-pro-preview", name: "Gemini 2.5" },
     { id: "openai/gpt-4o-2024-11-20", name: "GPT-4o" },
-    { id: "gpt-image-1", name: "ImageGen" },
+    { id: "gpt-image-1", name: "GPT ImageGen" },
+    { id: "gemini-2.0-flash-preview-image-generation", name: "Gemini ImageGen" },
   ];
 
   useEffect(() => {

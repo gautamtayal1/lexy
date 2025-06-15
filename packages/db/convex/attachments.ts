@@ -25,3 +25,15 @@ export const addAttachment = mutation({
     });
   },
 });
+
+export const getAttachmentsByMessageId = query({
+  args: {
+    messageId: v.string(),
+  },
+  handler: async (ctx, { messageId }) => {
+    return await ctx.db
+      .query("attachments")
+      .withIndex("byMessageId", (q) => q.eq("messageId", messageId))
+      .collect();
+  },
+});

@@ -9,7 +9,7 @@ const ThemeBackground = () => {
   
   return (
     <Image 
-      src={theme === 'dark' ? '/neww.jpg' : '/white.jpg'}
+      src={theme === 'dark' ? '/bl.jpg' : '/white.jpg'}
       alt="background" 
       fill
       className="object-cover transition-opacity duration-500"

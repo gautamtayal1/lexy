@@ -37,6 +37,16 @@ export function useApiKeys() {
     return apiKeyUtils.hasApiKey('openrouter');
   }, []);
 
+  // Check if OpenAI API key is configured
+  const hasOpenAIKey = useCallback((): boolean => {
+    return apiKeyUtils.hasApiKey('openai');
+  }, []);
+
+  // Check if Gemini API key is configured
+  const hasGeminiKey = useCallback((): boolean => {
+    return apiKeyUtils.hasApiKey('gemini');
+  }, []);
+
   // Load API keys on mount
   useEffect(() => {
     loadApiKeys();
@@ -61,6 +71,8 @@ export function useApiKeys() {
     removeApiKey,
     clearAllApiKeys,
     hasOpenRouterKey,
+    hasOpenAIKey,
+    hasGeminiKey,
     refreshApiKeys: loadApiKeys,
   };
 } 

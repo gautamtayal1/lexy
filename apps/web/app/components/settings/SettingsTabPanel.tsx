@@ -170,150 +170,196 @@ function ModelsContent() {
 function ApiKeysContent() {
   const { apiKeys, saveApiKeys, removeApiKey, clearAllApiKeys } = useApiKeys();
   const [tempKeys, setTempKeys] = useState<ApiKeyConfig>({});
-  const [showKey, setShowKey] = useState(false);
-  const [validationError, setValidationError] = useState('');
+  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Initialize temp keys when apiKeys change
   useEffect(() => {
     setTempKeys(apiKeys);
   }, [apiKeys]);
 
-  const handleKeyChange = (value: string) => {
-    setTempKeys({ openrouter: value });
+  const handleKeyChange = (provider: keyof ApiKeyConfig, value: string) => {
+    setTempKeys(prev => ({ ...prev, [provider]: value }));
     
     // Clear validation error when user starts typing
-    if (validationError) {
-      setValidationError('');
+    if (validationErrors[provider]) {
+      setValidationErrors(prev => ({ ...prev, [provider]: '' }));
     }
   };
 
-  const handleSaveKey = () => {
-    const key = tempKeys.openrouter;
+  const handleSaveKey = (provider: keyof ApiKeyConfig) => {
+    const key = tempKeys[provider];
     
     if (!key || !key.trim()) {
       // Remove the key if empty
-      removeApiKey('openrouter');
-      setValidationError('');
+      removeApiKey(provider);
+      setValidationErrors(prev => ({ ...prev, [provider]: '' }));
       return;
     }
 
-    if (!apiKeyUtils.validateApiKey('openrouter', key)) {
-      setValidationError('Invalid OpenRouter API key format (should start with sk-or-)');
+    if (!apiKeyUtils.validateApiKey(provider, key)) {
+      let errorMessage = '';
+      switch (provider) {
+        case 'openrouter':
+          errorMessage = 'Invalid OpenRouter API key format (should start with sk-or-)';
+          break;
+        case 'openai':
+          errorMessage = 'Invalid OpenAI API key format (should start with sk-)';
+          break;
+        case 'gemini':
+          errorMessage = 'Invalid Gemini API key format';
+          break;
+        default:
+          errorMessage = 'Invalid API key format';
+      }
+      setValidationErrors(prev => ({ ...prev, [provider]: errorMessage }));
       return;
     }
 
     // Save the key
-    saveApiKeys({ openrouter: key });
-    setValidationError('');
+    saveApiKeys({ ...apiKeys, [provider]: key });
+    setValidationErrors(prev => ({ ...prev, [provider]: '' }));
   };
 
-  const handleRemoveKey = () => {
-    removeApiKey('openrouter');
-    setTempKeys({ openrouter: '' });
-    setValidationError('');
+  const handleRemoveKey = (provider: keyof ApiKeyConfig) => {
+    removeApiKey(provider);
+    setTempKeys(prev => ({ ...prev, [provider]: '' }));
+    setValidationErrors(prev => ({ ...prev, [provider]: '' }));
   };
 
-  const toggleShowKey = () => {
-    setShowKey(!showKey);
+  const toggleShowKey = (provider: keyof ApiKeyConfig) => {
+    setShowKeys(prev => ({ ...prev, [provider]: !prev[provider] }));
   };
 
   const handleClearAll = () => {
-    if (confirm('Are you sure you want to remove your OpenRouter API key? This action cannot be undone.')) {
+    if (confirm('Are you sure you want to remove all your API keys? This action cannot be undone.')) {
       clearAllApiKeys();
       setTempKeys({});
-      setValidationError('');
+      setValidationErrors({});
     }
   };
 
-  const hasKey = apiKeys.openrouter && apiKeys.openrouter.trim();
-  const currentValue = tempKeys.openrouter || '';
+  const renderApiKeySection = (
+    provider: keyof ApiKeyConfig,
+    title: string,
+    description: string,
+    placeholder: string
+  ) => {
+    const hasKey = apiKeys[provider] && apiKeys[provider]!.trim();
+    const currentValue = tempKeys[provider] || '';
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-white font-medium">{title}</h3>
+            <p className="text-white/50 text-sm">{description}</p>
+          </div>
+          {hasKey && (
+            <div className="flex items-center gap-2">
+              <span className="text-green-400 text-sm">✓ Configured</span>
+              <button
+                onClick={() => handleRemoveKey(provider)}
+                className="text-red-400 hover:text-red-300 text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <input
+              type={showKeys[provider] ? "text" : "password"}
+              value={hasKey && !showKeys[provider] ? apiKeyUtils.getMaskedApiKey(apiKeys[provider]!) : currentValue}
+              onChange={(e) => handleKeyChange(provider, e.target.value)}
+              onFocus={() => {
+                if (hasKey) {
+                  setTempKeys(prev => ({ ...prev, [provider]: apiKeys[provider] }));
+                }
+              }}
+              placeholder={placeholder}
+              className={`w-full p-3 bg-white/10 border rounded-lg text-white placeholder-white/50 pr-12 ${
+                validationErrors[provider] ? 'border-red-500/50' : 'border-white/20'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => toggleShowKey(provider)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80"
+            >
+              {showKeys[provider] ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
+          <button
+            onClick={() => handleSaveKey(provider)}
+            className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Save
+          </button>
+        </div>
+
+        {validationErrors[provider] && (
+          <p className="text-red-400 text-sm">{validationErrors[provider]}</p>
+        )}
+      </div>
+    );
+  };
+
+  const hasAnyKey = Object.values(apiKeys).some(key => key && key.trim());
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">API Keys</h2>
-        {hasKey && (
+        {hasAnyKey && (
           <button
             onClick={handleClearAll}
             className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1 rounded-lg transition-colors border border-red-500/30 text-sm"
           >
-            Remove Key
+            Remove All Keys
           </button>
         )}
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-white font-medium">OpenRouter API Key</h3>
-              <p className="text-white/50 text-sm">For access to multiple AI models</p>
-            </div>
-            {hasKey && (
-              <div className="flex items-center gap-2">
-                <span className="text-green-400 text-sm">✓ Configured</span>
-                <button
-                  onClick={handleRemoveKey}
-                  className="text-red-400 hover:text-red-300 text-sm"
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-          </div>
+        {renderApiKeySection(
+          'openrouter',
+          'OpenRouter API Key',
+          'For access to multiple AI models via OpenRouter',
+          'sk-or-...'
+        )}
 
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <input
-                type={showKey ? "text" : "password"}
-                value={hasKey && !showKey ? apiKeyUtils.getMaskedApiKey(apiKeys.openrouter!) : currentValue}
-                onChange={(e) => handleKeyChange(e.target.value)}
-                onFocus={() => {
-                  if (hasKey) {
-                    setTempKeys({ openrouter: apiKeys.openrouter });
-                  }
-                }}
-                placeholder="sk-or-..."
-                className={`w-full p-3 bg-white/10 border rounded-lg text-white placeholder-white/50 pr-12 ${
-                  validationError ? 'border-red-500/50' : 'border-white/20'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={toggleShowKey}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80"
-              >
-                {showKey ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
-            <button
-              onClick={handleSaveKey}
-              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Save
-            </button>
-          </div>
+        {renderApiKeySection(
+          'openai',
+          'OpenAI API Key',
+          'For direct access to OpenAI models including image generation',
+          'sk-...'
+        )}
 
-          {validationError && (
-            <p className="text-red-400 text-sm">{validationError}</p>
-          )}
-        </div>
+        {renderApiKeySection(
+          'gemini',
+          'Gemini API Key',
+          'For direct access to Google Gemini models',
+          'AI...'
+        )}
 
         <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
           <h4 className="text-amber-400 font-medium mb-2">🔒 Security Notice</h4>
           <ul className="text-amber-300/70 text-sm space-y-1">
-            <li>• API key is encrypted and stored locally in your browser</li>
-            <li>• Key is never sent to our servers - used directly with OpenRouter</li>
-            <li>• Clearing browser data will remove the stored key</li>
-            <li>• Never share your API key with others</li>
+            <li>• API keys are encrypted and stored locally in your browser</li>
+            <li>• Keys are never sent to our servers - used directly with providers</li>
+            <li>• Clearing browser data will remove stored keys</li>
+            <li>• Never share your API keys with others</li>
           </ul>
         </div>
 
         <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
           <h4 className="text-blue-400 font-medium mb-2">💡 How it works</h4>
           <p className="text-blue-300/70 text-sm">
-            When you provide your OpenRouter API key, requests are made directly to OpenRouter using your key. 
-            This gives you full control over usage and billing, and provides access to all available models.
+            When you provide API keys, requests are made directly to the respective providers using your keys. 
+            This gives you full control over usage and billing, and provides access to all available models from each provider.
           </p>
         </div>
       </div>

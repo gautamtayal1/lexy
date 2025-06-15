@@ -1,5 +1,7 @@
 export interface ApiKeyConfig {
   openrouter?: string;
+  openai?: string;
+  gemini?: string;
 }
 
 const API_KEYS_STORAGE_KEY = 'byok_api_keys';
@@ -89,6 +91,10 @@ export const apiKeyUtils = {
     switch (provider) {
       case 'openrouter':
         return trimmedKey.startsWith('sk-or-') && trimmedKey.length > 20;
+      case 'openai':
+        return trimmedKey.startsWith('sk-') && trimmedKey.length > 20;
+      case 'gemini':
+        return trimmedKey.length > 30; // Gemini API keys are typically longer
       default:
         return trimmedKey.length > 10; // Basic length check for unknown providers
     }
