@@ -16,6 +16,7 @@ import type {
 import type * as attachments from "../attachments.js";
 import type * as http from "../http.js";
 import type * as messages from "../messages.js";
+import type * as sharedChats from "../sharedChats.js";
 import type * as threads from "../threads.js";
 import type * as users from "../users.js";
 
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   attachments: typeof attachments;
   http: typeof http;
   messages: typeof messages;
+  sharedChats: typeof sharedChats;
   threads: typeof threads;
   users: typeof users;
 }>;

@@ -250,6 +250,8 @@ export async function POST(request: NextRequest) {
             },
           ]
         : messages,
+      topK: modelParams.topK,
+      temperature: modelParams.temperature,
       // async onChunk({chunk}) {
       //   await convex.mutation(api.messages.patchMessage, {
       //     messageId: assistantMessageId,

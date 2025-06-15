@@ -84,4 +84,17 @@ export default defineSchema({
   })
   .index("byUserId", ["userId"])
   .index("byMessageId", ["messageId"]),
+
+  sharedChats: defineTable({
+    shareId: v.string(),
+    threadId: v.string(),
+    ownerId: v.string(),
+    title: v.string(),
+    isPublic: v.boolean(),
+    createdAt: v.number(),
+    expiresAt: v.optional(v.number()),
+  })
+  .index("byShareId", ["shareId"])
+  .index("byOwnerId", ["ownerId"])
+  .index("byThreadId", ["threadId"]),
 });

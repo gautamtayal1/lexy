@@ -12,6 +12,7 @@ import axios from 'axios';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
 import ChatContainer from './chat/ChatContainer';
+import ShareButton from './chat/ShareButton';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -40,6 +41,11 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   });
   
   const storedMessages = useQuery(api.messages.listMessages, {
+    threadId: threadId!,
+  });
+
+  const threadDetails = useQuery(api.threads.getThreadDetails, {
+    userId: user?.id || "",
     threadId: threadId!,
   });
 
@@ -179,51 +185,72 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
   };
 
   // Get the appropriate messages to display
-  const displayMessages = messages || storedMessages?.map(message => ({
+  const displayMessages = (messages || storedMessages?.map(message => ({
     id: message.messageId,
     role: message.role as 'user' | 'assistant' | 'system',
     content: message.content,
     messageId: message.messageId,
     createdAt: new Date(message.createdAt),
-  })).filter(msg => msg.role !== 'data') || [];
+  })) || []).filter(msg => msg.role !== 'data');
 
   return (
-    <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border flex flex-col transition-all duration-300 ${
-      isSidebarOpen ? 'left-[24rem]' : 'left-8'
-    } ${
-      theme === 'dark' 
-        ? 'border-white/20 bg-white/5' 
-        : 'border-black/20 bg-black/5'
-    }`}>
-      {!isSidebarOpen && (
-        <button 
-          onClick={onToggleSidebar}
-          className={`absolute -left-12 top-4 p-2 rounded-lg transition-colors ${
-            theme === 'dark' 
-              ? 'hover:bg-white/20 text-white' 
-              : 'hover:bg-black/10 text-black'
-          }`}
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-      )}
+    <div className="relative">
+      <div 
+        className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border flex flex-col transition-all duration-300 ${
+          isSidebarOpen ? 'left-[24rem]' : 'left-8'
+        } ${
+          theme === 'dark' 
+            ? 'border-white/20 bg-white/5' 
+            : 'border-black/20 bg-black/5'
+        }`}
+        style={{
+          clipPath: threadDetails && displayMessages.length > 0 
+            ? 'polygon(0 0, calc(100% - 60px) 0, calc(100% - 60px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 56px, 100% 56px, 100% 100%, 0 100%)'
+            : 'none'
+        }}
+      >
+        {!isSidebarOpen && (
+          <button 
+            onClick={onToggleSidebar}
+            className={`absolute -left-12 top-4 p-2 rounded-lg transition-colors ${
+              theme === 'dark' 
+                ? 'hover:bg-white/20 text-white' 
+                : 'hover:bg-black/10 text-black'
+            }`}
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        )}
 
-      <ChatContainer
-        messages={displayMessages}
-        messagesEndRef={messagesEndRef}
-        uploadedFiles={uploadedFiles}
-        onRemoveFile={handleRemoveFile}
-        input={input}
-        onInputChange={handleInputChange}
-        onSubmit={handleSubmitWithCleanup}
-        isCreativeMode={finalIsCreativeMode}
-        onToggleCreativeMode={handleToggleCreativeMode}
-        selectedModel={selectedModel}
-        onModelChange={handleModelChange}
-        onFileUpload={handleFileUpload}
-        onFileUploadStart={handleFileUploadStart}
-        status={status}
-      />
+        <ChatContainer
+          messages={displayMessages as any}
+          messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
+          uploadedFiles={uploadedFiles}
+          onRemoveFile={handleRemoveFile}
+          input={input}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmitWithCleanup}
+          isCreativeMode={finalIsCreativeMode}
+          onToggleCreativeMode={handleToggleCreativeMode}
+          selectedModel={selectedModel}
+          onModelChange={handleModelChange}
+          onFileUpload={handleFileUpload}
+          onFileUploadStart={handleFileUploadStart}
+          status={status}
+        />
+      </div>
+
+      {/* Share Button - Outside the clipped area */}
+      {threadDetails && displayMessages.length > 0 && (
+        <div className={`fixed top-12 z-20 transition-all duration-300 ${
+          isSidebarOpen ? 'right-12' : 'right-12'
+        }`}>
+          <ShareButton 
+            threadId={threadId!} 
+            threadTitle={threadDetails.title} 
+          />
+        </div>
+      )}
     </div>
   );
 };

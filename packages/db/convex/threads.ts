@@ -93,3 +93,19 @@ export const isThreadExists = query({
   },
 })
 
+export const getThreadDetails = query({
+  args: {
+    userId: v.string(),
+    threadId: v.string(),
+  },
+  handler: async(ctx, { userId, threadId }) => {
+    const thread = await ctx.db
+      .query("threads")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("threadId"), threadId))
+      .unique();
+
+    return thread;
+  },
+})
+
