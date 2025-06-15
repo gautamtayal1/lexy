@@ -1,14 +1,10 @@
-import {
-  generateUploadButton,
-  generateUploadDropzone,
-} from "@uploadthing/react";
-import type { OurFileRouter } from "@/app/api/uploadthing/core";
+// UploadThing utilities have been replaced with Digital Ocean Spaces integration
+// Use the FileUpload component instead from components/ui/FileUpload
 
-type UploadButtonComponent = ReturnType<
-  typeof generateUploadButton<OurFileRouter>
->;
+export const UploadButton = () => {
+  throw new Error("UploadButton has been replaced with FileUpload component from components/ui/FileUpload");
+};
 
-export const UploadButton: UploadButtonComponent =
-  generateUploadButton<OurFileRouter>();
-
-export const UploadDropzone = generateUploadDropzone<OurFileRouter>();
+export const UploadDropzone = () => {
+  throw new Error("UploadDropzone has been replaced with FileUpload component from components/ui/FileUpload");
+};

@@ -1,9 +1,11 @@
-import { createRouteHandler } from "uploadthing/next";
-import { ourFileRouter } from "./core";
+// This route has been replaced with Digital Ocean Spaces integration
+// See /api/upload for the new file upload implementation
+import { NextResponse } from "next/server";
 
-export const { GET, POST } = createRouteHandler({
-  router: ourFileRouter,
-  config: {
-    logLevel: "Debug",
-  },  
-});
+export async function GET() {
+  return NextResponse.json({ message: "UploadThing has been replaced with Digital Ocean Spaces" });
+}
+
+export async function POST() {
+  return NextResponse.json({ message: "UploadThing has been replaced with Digital Ocean Spaces" });
+}

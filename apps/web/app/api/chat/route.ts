@@ -99,16 +99,21 @@ export async function POST(request: NextRequest) {
     })
     
     if (attachments) {
-      await convex.mutation(api.attachments.addAttachment, {
-        userId,
-        messageId: assistantMessageId,
-        attachmentUrl: attachments.serverData.fileUrl,
-        fileName: attachments.name,
-        fileType: attachments.type,
-        fileSize: attachments.size,
-        fileKey: attachments.key,
-        attachmentId: crypto.randomUUID(),
-      });
+      // Handle both single attachment and array of attachments
+      const attachmentArray = Array.isArray(attachments) ? attachments : [attachments];
+      
+      for (const attachment of attachmentArray) {
+        await convex.mutation(api.attachments.addAttachment, {
+          userId,
+          messageId: assistantMessageId,
+          attachmentUrl: attachment.url,
+          fileName: attachment.name,
+          fileType: attachment.type,
+          fileSize: attachment.size,
+          fileKey: attachment.key,
+          attachmentId: crypto.randomUUID(),
+        });
+      }
     }
 
     if (model ==="gemini-2.0-flash-preview-image-generation") {

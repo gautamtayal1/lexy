@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowBigUp, Sparkles } from 'lucide-react';
-import { UploadButton } from '../../utils/uploadthing';
+import FileUpload from '../ui/FileUpload';
 import ModelDropdown from '../ModelDropdown';
 import { useAppSelector } from '../../store/hooks';
 
@@ -27,31 +27,6 @@ export default function ChatControls({
 }: ChatControlsProps) {
   const theme = useAppSelector((state) => state.theme.theme);
 
-  // Define button styles based on theme
-  const buttonStyle = theme === 'dark' 
-    ? {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        color: 'white',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        borderRadius: '0.75rem',
-        padding: '0.5rem 1rem',
-        fontSize: '0.875rem',
-        fontWeight: '500',
-        transition: 'all 0.2s',
-        backdropFilter: 'blur(40px)',
-      }
-    : {
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
-        color: 'black',
-        border: '1px solid rgba(0, 0, 0, 0.2)',
-        borderRadius: '0.75rem',
-        padding: '0.5rem 1rem',
-        fontSize: '0.875rem',
-        fontWeight: '500',
-        transition: 'all 0.2s',
-        backdropFilter: 'blur(40px)',
-      };
-
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center">
@@ -70,32 +45,19 @@ export default function ChatControls({
         <div className={`rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
           theme === 'dark' ? 'text-white' : 'text-black'
         }`}>    
-          <UploadButton
-            endpoint="imageUploader"
-            onUploadBegin={(name) => {
-              // Create loading file object when upload starts
-              const loadingFile = {
-                name: name,
-                isUploading: true,
-                type: 'loading'
-              };
-              onFileUploadStart([loadingFile]);
+          <FileUpload
+            onUploadStart={(files) => {
+              onFileUploadStart(files);
             }}
-            onClientUploadComplete={(res) => {
-              onFileUpload(res);
+            onUploadComplete={(files) => {
+              onFileUpload(files);
             }}
-            onUploadError={(error: Error) => {
-              alert(`ERROR! ${error.message}`);
+            onUploadError={(error) => {
+              alert(`ERROR! ${error}`);
             }}
-            appearance={{
-              button: buttonStyle,
-              container: "flex items-center",
-              allowedContent: "hidden"
-            }}
-            content={{
-              button: "📎 Attach",
-              allowedContent: ""
-            }}
+            maxFiles={5}
+            maxFileSize={4}
+            acceptedFileTypes={['image/*']}
           />
         </div>
       </div>

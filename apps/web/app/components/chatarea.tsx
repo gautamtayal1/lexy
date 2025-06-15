@@ -137,7 +137,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
 
   const handleFileUpload = (files: any[]) => {
     const newFile = files;
-    setFile(prev => [...prev, newFile]);
+    setFile(newFile);
   
     // Replace the loading file with the actual uploaded file
     setUploadedFiles(prev => {
@@ -176,7 +176,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar }: ChatAreaProps) => {
     content: message.content,
     messageId: message.messageId,
     createdAt: new Date(message.createdAt),
-  })) || [];
+  })).filter(msg => msg.role !== 'data') || [];
 
   return (
     <div className={`fixed top-8 right-8 h-[calc(100vh-4rem)] backdrop-blur-xl shadow rounded-2xl border flex flex-col transition-all duration-300 ${

@@ -26,19 +26,16 @@ export default function AttachmentList({ messageId }: AttachmentListProps) {
   return (
     <div className="mt-3 space-y-2">
       {attachments.map((attachment) => (
-
-            <div>
-                <Image
-                  key={attachment.attachmentId}
-                  src={attachment.attachmentUrl}
-                  alt={attachment.fileName}
-                  className="max-w-[400px] rounded-lg object-contain w-auto h-auto"
-                  loading="lazy"
-                  width={300}
-                  height={300}
-                />
-            </div>
-
+        <div key={attachment.attachmentId}>
+          <Image
+            src={attachment.attachmentUrl}
+            alt={attachment.fileName}
+            className="max-w-[400px] rounded-lg object-contain w-auto h-auto"
+            loading="lazy"
+            width={300}
+            height={300}
+          />
+        </div>
       ))}
     </div>
   );

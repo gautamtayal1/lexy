@@ -53,7 +53,7 @@ export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreview
                 </div>
               ) : uploadedFile.type?.startsWith('image/') ? (
                 <img 
-                  src={uploadedFile.serverData?.fileUrl || uploadedFile.url} 
+                  src={uploadedFile.url} 
                   alt={uploadedFile.name}
                   className="w-16 h-16 object-cover rounded-lg"
                 />

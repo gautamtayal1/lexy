@@ -4,7 +4,7 @@ import React from 'react';
 import { ArrowBigUp, Sparkles } from "lucide-react";
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSelectedModel, setIsCreativeMode, addAttachedFile, removeAttachedFile, AttachedFile } from '../store/chatSlice';
-import { UploadButton } from '../utils/uploadthing';
+import FileUpload from './ui/FileUpload';
 import ModelDropdown from './ModelDropdown';
 
 interface ChatControlsProps {
@@ -137,33 +137,24 @@ const ChatControls = ({
             Creative
           </button>
           
-          <button className={`rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
+          <div className={`rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
             theme === 'dark' ? 'text-white' : 'text-black'
           }`}>    
-            <UploadButton
-              endpoint="imageUploader"
-              onUploadBegin={(name) => {
-                handleFileUploadStart([name]);
+            <FileUpload
+              onUploadStart={(files) => {
+                handleFileUploadStart(files);
               }}
-              onClientUploadComplete={(res) => {
-                handleFileUpload(res);
+              onUploadComplete={(files) => {
+                handleFileUpload(files);
               }}
-              onUploadError={(error: Error) => {
-                alert(`ERROR! ${error.message}`);
+              onUploadError={(error) => {
+                alert(`ERROR! ${error}`);
               }}
-              appearance={{
-                button: theme === 'dark' 
-                  ? "bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl"
-                  : "bg-black/10 hover:bg-black/20 text-black border border-black/20 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl",
-                container: "flex items-center",
-                allowedContent: "hidden"
-              }}
-              content={{
-                button: "📎 Attach",
-                allowedContent: ""
-              }}
+              maxFiles={5}
+              maxFileSize={4}
+              acceptedFileTypes={['image/*']}
             />
-          </button>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">

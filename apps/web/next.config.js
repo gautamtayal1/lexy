@@ -14,9 +14,21 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'lxy.blr1.digitaloceanspaces.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'lxy.blr1.cdn.digitaloceanspaces.com',
         port: '',
         pathname: '/generated-images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lxy.blr1.cdn.digitaloceanspaces.com',
+        port: '',
+        pathname: '/uploads/**',
       },
     ],
   },

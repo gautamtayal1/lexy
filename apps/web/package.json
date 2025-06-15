@@ -21,8 +21,6 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@repo/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.1.8",
-    "@trpc/client": "^11.3.1",
-    "@uploadthing/react": "^7.3.1",
     "ai": "^4.3.16",
     "axios": "^1.9.0",
     "convex": "^1.24.8",
@@ -36,9 +34,8 @@
     "react-redux": "^9.2.0",
     "react-syntax-highlighter": "^15.6.1",
     "remark-gfm": "^4.0.1",
-    "tailwindcss": "^4.1.8",
-    "uploadthing": "^7.7.2"
-  },
+    "tailwindcss": "^4.1.8"
+    },
   "devDependencies": {
     "@repo/db": "workspace:*",
     "@repo/eslint-config": "workspace:*",
