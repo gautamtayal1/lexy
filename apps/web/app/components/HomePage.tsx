@@ -1,11 +1,14 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { Menu } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setQuestion } from '../store/chatSlice';
-import ChatControls from './ChatControls';
+import { setQuestion, clearAttachedFiles, setSelectedModel, setIsCreativeMode } from '../store/chatSlice';
+import FilePreview from './chat/FilePreview';
+import ChatInput from './chat/ChatInput';
+import ChatControls from './chat/ChatControls';
 
 interface HomePageProps {
   isSidebarOpen: boolean;
@@ -14,15 +17,43 @@ interface HomePageProps {
 
 const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const [input, setInput] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.theme);
+  const { selectedModel, isCreativeMode } = useAppSelector((state) => state.chat);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  // Clear files when component unmounts (when navigating away)
+  useEffect(() => {
+    return () => {
+      setUploadedFiles([]);
+      setInput("");
+      setIsSubmitting(false);
+    };
+  }, []);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!input.trim() || isSubmitting) return;
+    
+    // Store the question in Redux state
     dispatch(setQuestion(input));
+    
+    // Store uploaded files in session storage for the new chat BEFORE clearing them
+    if (uploadedFiles.length > 0) {
+      sessionStorage.setItem('pendingFiles', JSON.stringify(uploadedFiles));
+    }
+    
+    // IMMEDIATELY clear the visual state to hide preview
+    setIsSubmitting(true);
+    setInput("");
+    setUploadedFiles([]);
+    
+    // Generate ID and navigate
     const id = crypto.randomUUID();
+    
+    // Navigate immediately since we've already cleared the UI
     router.push(`/chat/${id}`);
   };
 
@@ -31,9 +62,39 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   };
 
   const handleQuestionClick = (question: string) => {
+    // Clear any uploaded files when clicking preset questions
+    setUploadedFiles([]);
+    dispatch(clearAttachedFiles());
+    
     const id = crypto.randomUUID();
     dispatch(setQuestion(question));
     router.push(`/chat/${id}`);
+  };
+
+  const handleFileUploadStart = (files: any[]) => {
+    // Add loading files to preview immediately
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const handleFileUpload = (files: any[]) => {
+    // Replace the loading files with the actual uploaded files
+    setUploadedFiles(prev => {
+      // Remove all loading files and add the actual uploaded files
+      const nonLoadingFiles = prev.filter(f => !f.isUploading);
+      return [...nonLoadingFiles, ...files];
+    });
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleToggleCreativeMode = () => {
+    dispatch(setIsCreativeMode(!isCreativeMode));
+  };
+
+  const handleModelChange = (model: string) => {
+    dispatch(setSelectedModel(model));
   };
 
   const questions = [
@@ -91,12 +152,30 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
       </div>
 
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
-        <ChatControls
-          input={input}
-          onInputChange={handleInputChange}
-          onSubmit={handleSubmit}
-          placeholder="Ask me anything..."
-        />
+        <div className={`backdrop-blur-xl rounded-3xl shadow-xl border p-3 transition-all duration-300 ease-in-out ${
+          theme === 'dark' 
+            ? 'border-white/30' 
+            : 'border-black/30'
+        }`}>
+          {!isSubmitting && uploadedFiles.length > 0 && <FilePreview uploadedFiles={uploadedFiles} onRemoveFile={handleRemoveFile} />}
+          
+          <ChatInput 
+            input={input} 
+            onInputChange={handleInputChange} 
+            onSubmit={handleSubmit}
+            placeholder="Ask me anything..."
+          />
+          
+          <ChatControls
+            isCreativeMode={isCreativeMode}
+            onToggleCreativeMode={handleToggleCreativeMode}
+            selectedModel={selectedModel}
+            onModelChange={handleModelChange}
+            onFileUpload={handleFileUpload}
+            onFileUploadStart={handleFileUploadStart}
+            onSubmit={handleSubmit}
+          />
+        </div>
       </div>
     </div>
   );

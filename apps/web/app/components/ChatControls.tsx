@@ -137,24 +137,20 @@ const ChatControls = ({
             Creative
           </button>
           
-          <div className={`rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
-            theme === 'dark' ? 'text-white' : 'text-black'
-          }`}>    
-            <FileUpload
-              onUploadStart={(files) => {
-                handleFileUploadStart(files);
-              }}
-              onUploadComplete={(files) => {
-                handleFileUpload(files);
-              }}
-              onUploadError={(error) => {
-                alert(`ERROR! ${error}`);
-              }}
-                          maxFiles={5}
+          <FileUpload
+            onUploadStart={(files) => {
+              handleFileUploadStart(files);
+            }}
+            onUploadComplete={(files) => {
+              handleFileUpload(files);
+            }}
+            onUploadError={(error) => {
+              alert(`ERROR! ${error}`);
+            }}
+            maxFiles={5}
             maxFileSize={20}
             acceptedFileTypes={['image/*']}
-            />
-          </div>
+          />
         </div>
         
         <div className="flex items-center gap-3">

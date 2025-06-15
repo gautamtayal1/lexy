@@ -103,6 +103,22 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
     console.log('ChatArea useEffect running:', { isInitialized, question });
     if (!isInitialized) {
       if (question) {
+        // Check for pending files from homepage
+        const pendingFiles = sessionStorage.getItem('pendingFiles');
+        if (pendingFiles) {
+          try {
+            const files = JSON.parse(pendingFiles);
+            // Only set files for API, NOT for preview since they'll be sent immediately
+            setFile(files);
+            // Ensure uploadedFiles stays empty so no preview shows
+            setUploadedFiles([]);
+            // Clear the session storage
+            sessionStorage.removeItem('pendingFiles');
+          } catch (error) {
+            console.error('Error parsing pending files:', error);
+          }
+        }
+
         append({ role: 'user', content: question })
 
         const setThreadTitle = async () => {
@@ -174,6 +190,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
 
   const handleSubmitWithCleanup = () => {
     handleSubmit();
+    // Clear both file states immediately after sending
     setFile(null);
     setUploadedFiles([]);
   };

@@ -7,9 +7,10 @@ interface ChatInputProps {
   input: string;
   onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: (e?: React.FormEvent) => void;
+  placeholder?: string;
 }
 
-export default function ChatInput({ input, onInputChange, onSubmit }: ChatInputProps) {
+export default function ChatInput({ input, onInputChange, onSubmit, placeholder = "Type your message..." }: ChatInputProps) {
   const theme = useAppSelector((state) => state.theme.theme);
 
   return (
@@ -28,7 +29,7 @@ export default function ChatInput({ input, onInputChange, onSubmit }: ChatInputP
             onSubmit(e);
           }
         }}
-        placeholder="Type your message..."
+        placeholder={placeholder}
         className={`w-full rounded-xl py-2 px-4 pr-12 text-base focus:outline-none resize-none overflow-hidden min-h-[48px] ${
           theme === 'dark' 
             ? 'text-white placeholder-white/50' 
