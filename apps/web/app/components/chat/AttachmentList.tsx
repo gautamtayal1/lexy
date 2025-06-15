@@ -24,21 +24,56 @@ export default function AttachmentList({ messageId, messageRole }: AttachmentLis
     return null;
   }
 
+  // Different layouts for user vs assistant messages
+  if (messageRole === 'user') {
+    // Group images into columns of 3
+    const columns = [];
+    for (let i = 0; i < attachments.length; i += 3) {
+      columns.push(attachments.slice(i, i + 3));
+    }
+    
+    return (
+      <div className="mt-3 ml-auto">
+        <div className={`p-2 rounded-lg border ${
+          theme === 'dark' 
+            ? 'bg-white/5 border-white/10' 
+            : 'bg-black/5 border-black/10'
+        }`}>
+          <div className="flex flex-col gap-3">
+            {columns.map((column, columnIndex) => (
+              <div key={columnIndex} className="flex gap-2">
+                {column.map((attachment) => (
+                  <div key={attachment.attachmentId} className="flex-shrink-0">
+                    <Image
+                      src={attachment.attachmentUrl}
+                      alt={attachment.fileName}
+                      className="rounded-lg object-cover w-32 h-32"
+                      loading="lazy"
+                      width={128}
+                      height={128}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Assistant images - larger and full width
   return (
-    <div className={`mt-3 space-y-2 ${messageRole === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start'}`}>
+    <div className="mt-3 space-y-2 flex flex-col items-start">
       {attachments.map((attachment) => (
-        <div key={attachment.attachmentId} className={messageRole === 'user' ? 'max-w-[300px]' : 'max-w-[400px]'}>
+        <div key={attachment.attachmentId} className="max-w-[400px]">
           <Image
             src={attachment.attachmentUrl}
             alt={attachment.fileName}
-            className={`rounded-lg object-contain w-auto h-auto ${
-              messageRole === 'user' 
-                ? 'max-w-[300px] max-h-[300px]' 
-                : 'max-w-[400px] max-h-[400px]'
-            }`}
+            className="rounded-lg object-contain w-auto h-auto max-w-[400px] max-h-[400px]"
             loading="lazy"
-            width={messageRole === 'user' ? 250 : 300}
-            height={messageRole === 'user' ? 250 : 300}
+            width={300}
+            height={300}
           />
         </div>
       ))}

@@ -56,7 +56,7 @@ export default function ChatControls({
               alert(`ERROR! ${error}`);
             }}
             maxFiles={5}
-            maxFileSize={4}
+            maxFileSize={20}
             acceptedFileTypes={['image/*']}
           />
         </div>

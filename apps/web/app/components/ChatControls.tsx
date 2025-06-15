@@ -150,9 +150,9 @@ const ChatControls = ({
               onUploadError={(error) => {
                 alert(`ERROR! ${error}`);
               }}
-              maxFiles={5}
-              maxFileSize={4}
-              acceptedFileTypes={['image/*']}
+                          maxFiles={5}
+            maxFileSize={20}
+            acceptedFileTypes={['image/*']}
             />
           </div>
         </div>
