@@ -43,75 +43,178 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-lg font-medium tracking-wide transition-colors ${
+        className={`group flex items-center gap-2.5 rounded-xl px-3 py-3 text-base font-medium tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 ${
           theme === 'dark' 
-            ? 'text-white hover:bg-white/10' 
-            : 'text-black hover:bg-black/10'
-        }`}
+            ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/50 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/60 hover:to-slate-700/95 text-slate-200 border border-slate-500/50 hover:border-slate-400/70 shadow-md hover:shadow-slate-500/25' 
+            : 'bg-gradient-to-r from-slate-200/95 via-slate-300/60 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/70 hover:to-slate-300/95 text-slate-700 border border-slate-400/60 hover:border-slate-500/80 shadow-md hover:shadow-slate-500/25'
+        } ${isOpen ? 'scale-105' : ''}`}
       >
-        {selectedModelData?.logo && (
-          <Image
-            src={selectedModelData.logo}
-            alt={selectedModelData.name}
-            width={20}
-            height={20}
-            className="rounded-sm"
-          />
-        )}
-        {selectedModelData?.name}
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <div className="relative">
+          {selectedModelData?.logo && (
+            <Image
+              src={selectedModelData.logo}
+              alt={selectedModelData.name}
+              width={20}
+              height={20}
+              className="rounded-md transition-transform duration-300 group-hover:rotate-3"
+            />
+          )}
+          <div className={`absolute -inset-1 rounded-md transition-opacity duration-300 ${
+            isOpen ? 'opacity-100' : 'opacity-0'
+          } ${theme === 'dark' ? 'bg-orange-500/20' : 'bg-orange-400/20'} blur-sm`}></div>
+        </div>
+        <span className="transition-all duration-300 group-hover:text-orange-300">
+          {selectedModelData?.name}
+        </span>
+        <ChevronDown className={`h-4 w-4 transition-all duration-500 ease-out ${
+          isOpen ? 'rotate-180 text-orange-400' : 'rotate-0'
+        } group-hover:text-orange-400`} />
       </button>
 
-      {isOpen && (
-        <div className={`absolute bottom-full mb-2 right-0 w-64 backdrop-blur-xl rounded-lg shadow-lg border overflow-hidden ${
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`} 
+        onClick={() => setIsOpen(false)}
+      />
+
+      {/* Dropdown */}
+      <div className={`absolute bottom-full mb-3 right-0 w-64 transform transition-all duration-500 ease-out ${
+        isOpen 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+      }`}>
+        <div className={`backdrop-blur-xl rounded-xl shadow-xl border-2 overflow-hidden ${
           theme === 'dark' 
-            ? 'bg-slate-900 border-white/20' 
-            : 'bg-white/90 border-black/20'
+            ? 'bg-gradient-to-br from-slate-800/95 via-slate-900/95 to-orange-900/95 border-orange-500/30 shadow-orange-500/10' 
+            : 'bg-gradient-to-br from-white/95 via-slate-100/95 to-orange-100/95 border-orange-400/30 shadow-orange-500/10'
         }`}>
-          {models.map((model) => (
-            <button
-              key={model.id}
-              onClick={() => {
-                onModelChange(model.id);
-                setIsOpen(false);
-              }}
-              className={`w-full text-left px-4 py-3 transition-colors flex items-center gap-3 ${
-                theme === 'dark'
-                  ? `text-white hover:bg-white/20 ${selectedModel === model.id ? 'bg-white/20' : ''}`
-                  : `text-black hover:bg-black/10 ${selectedModel === model.id ? 'bg-black/10' : ''}`
-              }`}
-            >
-              <div className="flex-shrink-0">
-                {model.logo ? (
-                  <Image
-                    src={model.logo}
-                    alt={model.name}
-                    width={24}
-                    height={24}
-                    className="rounded-sm"
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-sm bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {model.name.charAt(0)}
-                    </span>
+          {/* Header */}
+          <div className={`px-4 py-2.5 border-b ${
+            theme === 'dark' ? 'border-orange-500/20' : 'border-orange-400/20'
+          }`}>
+            <h3 className={`text-sm font-semibold ${
+              theme === 'dark' ? 'text-orange-200' : 'text-orange-800'
+            }`}>
+              Select Model
+            </h3>
+          </div>
+
+          {/* Models List */}
+          <div className="max-h-72 overflow-y-auto custom-scrollbar">
+            {models.map((model, index) => (
+              <button
+                key={model.id}
+                onClick={() => {
+                  onModelChange(model.id);
+                  setIsOpen(false);
+                }}
+                style={{ animationDelay: `${index * 50}ms` }}
+                className={`w-full text-left px-4 py-3 transition-all duration-300 flex items-center gap-3 group relative overflow-hidden ${
+                  isOpen ? 'animate-slideInUp' : ''
+                } ${
+                  theme === 'dark'
+                    ? `text-slate-200 hover:bg-gradient-to-r hover:from-slate-700/50 hover:via-orange-800/30 hover:to-slate-700/50 hover:shadow-md ${selectedModel === model.id ? 'bg-gradient-to-r from-slate-700/60 via-orange-800/40 to-slate-700/60 shadow-md' : ''}`
+                    : `text-slate-700 hover:bg-gradient-to-r hover:from-slate-200/60 hover:via-orange-200/40 hover:to-slate-200/60 hover:shadow-md ${selectedModel === model.id ? 'bg-gradient-to-r from-slate-200/80 via-orange-200/50 to-slate-200/80 shadow-md' : ''}`
+                }`}
+              >
+                {/* Animated background gradient */}
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                  theme === 'dark' 
+                    ? 'bg-gradient-to-r from-orange-600/10 to-slate-600/10' 
+                    : 'bg-gradient-to-r from-orange-400/5 to-slate-400/5'
+                }`}></div>
+
+                {/* Logo */}
+                <div className="relative flex-shrink-0 z-10">
+                  {model.logo ? (
+                    <div className="relative">
+                      <Image
+                        src={model.logo}
+                        alt={model.name}
+                        width={28}
+                        height={28}
+                        className="rounded-md transition-all duration-300 group-hover:scale-105 group-hover:rotate-2"
+                      />
+                      <div className={`absolute -inset-1 rounded-md transition-opacity duration-300 group-hover:opacity-100 opacity-0 ${
+                        theme === 'dark' ? 'bg-orange-500/20' : 'bg-orange-400/20'
+                      } blur-sm`}></div>
+                    </div>
+                  ) : (
+                    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500 to-slate-600 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:rotate-2 shadow-md">
+                      <span className="text-white text-sm font-bold">
+                        {model.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Text Content */}
+                <div className="flex-1 min-w-0 z-10">
+                  <div className={`text-xs font-medium truncate transition-colors duration-300 ${
+                    theme === 'dark' ? 'text-orange-300 group-hover:text-orange-200' : 'text-orange-600 group-hover:text-orange-700'
+                  }`}>
+                    {model.company}
+                  </div>
+                  <div className={`text-sm font-semibold tracking-wide truncate transition-colors duration-300 ${
+                    theme === 'dark' ? 'group-hover:text-orange-200' : 'group-hover:text-orange-700'
+                  }`}>
+                    {model.name}
+                  </div>
+                </div>
+
+                {/* Selection indicator */}
+                {selectedModel === model.id && (
+                  <div className="flex-shrink-0 z-10">
+                    <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
                   </div>
                 )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className={`text-xs truncate ${
-                  theme === 'dark' ? 'text-white/60' : 'text-black/60'
-                }`}>
-                  {model.company}
-                </div>
-                <div className="text-sm font-medium tracking-wide truncate">
-                  {model.name}
-                </div>
-              </div>
-            </button>
-          ))}
+
+                {/* Hover line effect */}
+                <div className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 group-hover:w-full w-0 ${
+                  theme === 'dark' ? 'bg-gradient-to-r from-orange-400 to-slate-400' : 'bg-gradient-to-r from-orange-500 to-slate-500'
+                }`}></div>
+              </button>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
+
+      <style jsx>{`
+        @keyframes slideInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-slideInUp {
+          animation: slideInUp 0.4s ease-out forwards;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.1)' : 'rgba(255, 165, 0, 0.1)'};
+          border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.4)' : 'rgba(255, 165, 0, 0.5)'};
+          border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.6)' : 'rgba(255, 165, 0, 0.7)'};
+        }
+      `}</style>
     </div>
   );
 };
