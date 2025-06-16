@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Lock } from 'lucide-react';
 import { useAppSelector } from '../store/hooks';
+import { useApiKeys } from '../hooks/useApiKeys';
 import Image from 'next/image';
 
 interface ModelDropdownProps {
@@ -12,21 +13,53 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const theme = useAppSelector((state) => state.theme.theme);
+  const { hasOpenRouterKey, hasOpenAIKey, hasGeminiKey } = useApiKeys();
 
-  const models = [
-    { id: "openai/gpt-4.1-mini", name: "GPT-4.1", logo: "/openai.jpg", company: "OpenAI" },
-    { id: "openai/o4-mini", name: "O4-mini", logo: "/openai.jpg", company: "OpenAI" },
-    { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7", logo: "/claude.png", company: "Anthropic" },
-    { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek", logo: "/deepseek.jpg", company: "DeepSeek" },
-    { id: "llama-3.3-70b-versatile", name: "Llama 3.3", logo: "/meta.png", company: "Meta" },
-    { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0", logo: "/gemini.jpg", company: "Google" },
-    { id: "google/gemini-2.5-pro-preview", name: "Gemini 2.5", logo: "/gemini.jpg", company: "Google" },
-    { id: "openai/gpt-4o-2024-11-20", name: "GPT-4o", logo: "/openai.jpg", company: "OpenAI" },
-    { id: "gpt-image-1", name: "GPT ImageGen", logo: "/openai.jpg", company: "OpenAI" },
-    { id: "gemini-2.0-flash-preview-image-generation", name: "Gemini ImageGen", logo: "/gemini.jpg", company: "Google" },
+  const allModels = [
+    { id: "openai/gpt-4.1-mini", name: "GPT-4.1", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
+    { id: "openai/o4-mini", name: "O4-mini", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
+    { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7", logo: "/claude.png", company: "Anthropic", requiresKey: "openrouter" },
+    { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek", logo: "/deepseek.jpg", company: "DeepSeek", requiresKey: null }, // Free model via Groq
+    { id: "llama-3.3-70b-versatile", name: "Llama 3.3", logo: "/meta.png", company: "Meta", requiresKey: null }, // Free model via Groq
+    { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0", logo: "/gemini.jpg", company: "Google", requiresKey: "openrouter" },
+    { id: "google/gemini-2.5-pro-preview", name: "Gemini 2.5", logo: "/gemini.jpg", company: "Google", requiresKey: "openrouter" },
+    { id: "openai/gpt-4o-2024-11-20", name: "GPT-4o", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
+    { id: "gpt-image-1", name: "GPT ImageGen", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openai" }, // Direct OpenAI image gen
+    { id: "gemini-2.0-flash-preview-image-generation", name: "Gemini ImageGen", logo: "/gemini.jpg", company: "Google", requiresKey: "gemini" }, // Direct Gemini image gen
   ];
 
-  const selectedModelData = models.find(m => m.id === selectedModel);
+  // Check if a model is available
+  const isModelAvailable = (model: any) => {
+    if (!model.requiresKey) return true; // Free models
+    
+    switch (model.requiresKey) {
+      case "openrouter":
+        return hasOpenRouterKey();
+      case "openai":
+        return hasOpenAIKey();
+      case "gemini":
+        return hasGeminiKey();
+      default:
+        return false;
+    }
+  };
+
+  // Separate available and unavailable models
+  const availableModels = allModels.filter(isModelAvailable);
+  const unavailableModels = allModels.filter(model => !isModelAvailable(model));
+
+  const selectedModelData = allModels.find(m => m.id === selectedModel);
+
+  // If selected model is not available anymore, switch to a free model
+  useEffect(() => {
+    if (selectedModelData && !isModelAvailable(selectedModelData)) {
+      // Default to first free model (DeepSeek or Llama)
+      const freeModel = availableModels.find(m => !m.requiresKey) || availableModels[0];
+      if (freeModel) {
+        onModelChange(freeModel.id);
+      }
+    }
+  }, [selectedModelData, availableModels, onModelChange, hasOpenRouterKey, hasOpenAIKey, hasGeminiKey]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,10 +76,10 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-base font-medium tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 ${
+        className={`group flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
           theme === 'dark' 
-            ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/50 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/60 hover:to-slate-700/95 text-slate-200 border border-slate-500/50 hover:border-slate-400/70 shadow-md hover:shadow-slate-500/25' 
-            : 'bg-gradient-to-r from-slate-200/95 via-slate-300/60 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/70 hover:to-slate-300/95 text-slate-700 border border-slate-400/60 hover:border-slate-500/80 shadow-md hover:shadow-slate-500/25'
+            ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20' 
+            : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
         } ${isOpen ? 'scale-105' : ''}`}
       >
         <div className="relative">
@@ -59,16 +92,13 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
               className="rounded-md transition-transform duration-300 group-hover:rotate-3"
             />
           )}
-          <div className={`absolute -inset-1 rounded-md transition-opacity duration-300 ${
-            isOpen ? 'opacity-100' : 'opacity-0'
-          } ${theme === 'dark' ? 'bg-orange-500/20' : 'bg-orange-400/20'} blur-sm`}></div>
         </div>
-        <span className="transition-all duration-300 group-hover:text-orange-300">
-          {selectedModelData?.name}
+        <span className="transition-colors duration-300">
+          {selectedModelData?.name || 'Select Model'}
         </span>
         <ChevronDown className={`h-4 w-4 transition-all duration-500 ease-out ${
-          isOpen ? 'rotate-180 text-orange-400' : 'rotate-0'
-        } group-hover:text-orange-400`} />
+          isOpen ? 'rotate-180' : 'rotate-0'
+        }`} />
       </button>
 
       {/* Backdrop */}
@@ -80,30 +110,31 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
       />
 
       {/* Dropdown */}
-      <div className={`absolute bottom-full mb-3 right-0 w-64 transform transition-all duration-500 ease-out ${
+      <div className={`absolute bottom-full mb-3 right-0 w-80 transform transition-all duration-500 ease-out ${
         isOpen 
           ? 'opacity-100 translate-y-0 scale-100' 
           : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
       }`}>
         <div className={`backdrop-blur-xl rounded-xl shadow-xl border-2 overflow-hidden ${
           theme === 'dark' 
-            ? 'bg-gradient-to-br from-slate-800/95 via-slate-900/95 to-orange-900/95 border-orange-500/30 shadow-orange-500/10' 
+            ? 'bg-gradient-to-br from-slate-900/95 via-slate-900/95 to-slate-900/90 border-orange-500/20 shadow-slate-500/20' 
             : 'bg-gradient-to-br from-white/95 via-slate-100/95 to-orange-100/95 border-orange-400/30 shadow-orange-500/10'
         }`}>
           {/* Header */}
-          <div className={`px-4 py-2.5 border-b ${
-            theme === 'dark' ? 'border-orange-500/20' : 'border-orange-400/20'
+          <div className={`px-5 py-3 border-b ${
+            theme === 'dark' ? 'border-orange-500/10' : 'border-orange-400/20'
           }`}>
             <h3 className={`text-sm font-semibold ${
-              theme === 'dark' ? 'text-orange-200' : 'text-orange-800'
+              theme === 'dark' ? 'text-slate-200' : 'text-orange-700'
             }`}>
               Select Model
             </h3>
           </div>
 
           {/* Models List */}
-          <div className="max-h-72 overflow-y-auto custom-scrollbar">
-            {models.map((model, index) => (
+          <div className="max-h-80 overflow-y-auto custom-scrollbar">
+            {/* Available Models */}
+            {availableModels.map((model, index) => (
               <button
                 key={model.id}
                 onClick={() => {
@@ -111,18 +142,18 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                   setIsOpen(false);
                 }}
                 style={{ animationDelay: `${index * 50}ms` }}
-                className={`w-full text-left px-4 py-3 transition-all duration-300 flex items-center gap-3 group relative overflow-hidden ${
+                className={`w-full text-left px-5 py-4 transition-all duration-300 flex items-center gap-4 group relative overflow-hidden ${
                   isOpen ? 'animate-slideInUp' : ''
                 } ${
                   theme === 'dark'
-                    ? `text-slate-200 hover:bg-gradient-to-r hover:from-slate-700/50 hover:via-orange-800/30 hover:to-slate-700/50 hover:shadow-md ${selectedModel === model.id ? 'bg-gradient-to-r from-slate-700/60 via-orange-800/40 to-slate-700/60 shadow-md' : ''}`
+                    ? `text-slate-200 hover:bg-gradient-to-r hover:from-slate-700/50 hover:via-slate-600/30 hover:to-slate-700/50 hover:shadow-md ${selectedModel === model.id ? 'bg-gradient-to-r from-slate-700/60 via-slate-600/40 to-slate-700/60 shadow-md' : ''}`
                     : `text-slate-700 hover:bg-gradient-to-r hover:from-slate-200/60 hover:via-orange-200/40 hover:to-slate-200/60 hover:shadow-md ${selectedModel === model.id ? 'bg-gradient-to-r from-slate-200/80 via-orange-200/50 to-slate-200/80 shadow-md' : ''}`
                 }`}
               >
                 {/* Animated background gradient */}
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
                   theme === 'dark' 
-                    ? 'bg-gradient-to-r from-orange-600/10 to-slate-600/10' 
+                    ? 'bg-gradient-to-r from-orange-600/3 to-slate-600/10' 
                     : 'bg-gradient-to-r from-orange-400/5 to-slate-400/5'
                 }`}></div>
 
@@ -133,16 +164,16 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                       <Image
                         src={model.logo}
                         alt={model.name}
-                        width={28}
-                        height={28}
+                        width={32}
+                        height={32}
                         className="rounded-md transition-all duration-300 group-hover:scale-105 group-hover:rotate-2"
                       />
                       <div className={`absolute -inset-1 rounded-md transition-opacity duration-300 group-hover:opacity-100 opacity-0 ${
-                        theme === 'dark' ? 'bg-orange-500/20' : 'bg-orange-400/20'
+                        theme === 'dark' ? 'bg-orange-500/8' : 'bg-orange-400/10'
                       } blur-sm`}></div>
                     </div>
                   ) : (
-                    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500 to-slate-600 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:rotate-2 shadow-md">
+                    <div className="w-8 h-8 rounded-md bg-gradient-to-br from-orange-500/60 to-slate-600 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:rotate-2 shadow-md">
                       <span className="text-white text-sm font-bold">
                         {model.name.charAt(0)}
                       </span>
@@ -153,12 +184,21 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                 {/* Text Content */}
                 <div className="flex-1 min-w-0 z-10">
                   <div className={`text-xs font-medium truncate transition-colors duration-300 ${
-                    theme === 'dark' ? 'text-orange-300 group-hover:text-orange-200' : 'text-orange-600 group-hover:text-orange-700'
+                    theme === 'dark' ? 'text-slate-300 group-hover:text-orange-300/80' : 'text-slate-600 group-hover:text-orange-600'
                   }`}>
                     {model.company}
+                    {!model.requiresKey && (
+                      <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+                        theme === 'dark' 
+                          ? 'bg-green-500/20 text-green-400' 
+                          : 'bg-green-500/20 text-green-600'
+                      }`}>
+                        Free
+                      </span>
+                    )}
                   </div>
                   <div className={`text-sm font-semibold tracking-wide truncate transition-colors duration-300 ${
-                    theme === 'dark' ? 'group-hover:text-orange-200' : 'group-hover:text-orange-700'
+                    theme === 'dark' ? 'group-hover:text-slate-100' : 'group-hover:text-slate-800'
                   }`}>
                     {model.name}
                   </div>
@@ -167,16 +207,75 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                 {/* Selection indicator */}
                 {selectedModel === model.id && (
                   <div className="flex-shrink-0 z-10">
-                    <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-500/80 animate-pulse"></div>
                   </div>
                 )}
 
                 {/* Hover line effect */}
                 <div className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 group-hover:w-full w-0 ${
-                  theme === 'dark' ? 'bg-gradient-to-r from-orange-400 to-slate-400' : 'bg-gradient-to-r from-orange-500 to-slate-500'
+                  theme === 'dark' ? 'bg-gradient-to-r from-orange-400/40 to-slate-400' : 'bg-gradient-to-r from-orange-500/60 to-slate-500'
                 }`}></div>
               </button>
             ))}
+
+            {/* Unavailable Models (Disabled) */}
+            {unavailableModels.map((model, index) => (
+              <div
+                key={`disabled-${model.id}`}
+                style={{ animationDelay: `${(availableModels.length + index) * 50}ms` }}
+                className={`w-full text-left px-5 py-4 flex items-center gap-4 relative opacity-50 cursor-not-allowed ${
+                  isOpen ? 'animate-slideInUp' : ''
+                } ${
+                  theme === 'dark' ? 'text-white/40' : 'text-black/40'
+                }`}
+              >
+                {/* Logo */}
+                <div className="relative flex-shrink-0 z-10">
+                  {model.logo ? (
+                    <Image
+                      src={model.logo}
+                      alt={model.name}
+                      width={32}
+                      height={32}
+                      className="rounded-md grayscale"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-md bg-gray-500 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">
+                        {model.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Text Content */}
+                <div className="flex-1 min-w-0 z-10">
+                  <div className="text-xs font-medium truncate">
+                    {model.company}
+                    <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+                      theme === 'dark' 
+                        ? 'bg-red-500/20 text-red-400' 
+                        : 'bg-red-500/20 text-red-600'
+                    }`}>
+                      API Key Required
+                    </span>
+                  </div>
+                  <div className="text-sm font-semibold tracking-wide truncate">
+                    {model.name}
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* No models available message */}
+            {availableModels.length === 0 && (
+              <div className={`px-5 py-6 text-center ${
+                theme === 'dark' ? 'text-white/70' : 'text-black/70'
+              }`}>
+                <p className="text-sm">No models available</p>
+                <p className="text-xs mt-1">Configure API keys in settings to access models</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -202,17 +301,17 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
         }
         
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.1)' : 'rgba(255, 165, 0, 0.1)'};
+          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.03)' : 'rgba(255, 165, 0, 0.05)'};
           border-radius: 3px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.4)' : 'rgba(255, 165, 0, 0.5)'};
+          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.2)' : 'rgba(255, 165, 0, 0.4)'};
           border-radius: 3px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.6)' : 'rgba(255, 165, 0, 0.7)'};
+          background: ${theme === 'dark' ? 'rgba(255, 165, 0, 0.3)' : 'rgba(255, 165, 0, 0.6)'};
         }
       `}</style>
     </div>

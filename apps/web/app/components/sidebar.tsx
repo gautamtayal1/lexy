@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
 import { Authenticated, Unauthenticated, useQuery, useMutation } from 'convex/react';
-import { MenuIcon, PlusIcon, Settings, Share2, Trash2, Copy, Check, X } from 'lucide-react';
+import { MenuIcon, PlusIcon, Settings, Share2, Trash2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { api } from '@repo/db/convex/_generated/api';
 import { useAppSelector } from '../store/hooks';
@@ -160,43 +160,66 @@ const Sidebar = ({ isOpen, onToggle, onShareChat }: SidebarProps) => {
       </div>
 
       <Unauthenticated>
-        <div className="p-4 flex flex-col items-center justify-center">
-          <SignInButton />
-          <SignOutButton />
+        <div className={`p-4 border-t ${
+          theme === 'dark' ? 'border-white/10' : 'border-black/10'
+        }`}>
+          <SignInButton>
+            <button className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+              theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20' 
+                : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
+            }`}>
+              Sign In
+            </button>
+          </SignInButton>
         </div>
       </Unauthenticated>
 
       <Authenticated>
-        <div className="p-4">
+        <div className={`p-4 border-t ${
+          theme === 'dark' ? 'border-white/10' : 'border-black/10'
+        }`}>
           <div className="flex items-center gap-3">
             <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-              theme === 'dark' ? 'bg-white/30' : 'bg-black/20'
+              theme === 'dark' ? 'bg-white/20' : 'bg-black/20'
             }`}>
               <span className={`text-sm font-medium ${
                 theme === 'dark' ? 'text-white' : 'text-black'
               }`}>{user?.firstName?.charAt(0)}</span>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <p className={`text-sm font-medium ${
-                  theme === 'dark' ? 'text-white' : 'text-black'
-                }`}>{user?.firstName} {user?.lastName}</p>
-                <button 
-                  onClick={handleSettingsClick}
-                  className={`p-1.5 rounded-lg transition-colors ${
-                    theme === 'dark' 
-                      ? 'hover:bg-white/20' 
-                      : 'hover:bg-black/10'
-                  }`}
-                >
-                  <Settings className={`w-4 h-4 transition-colors ${
-                    theme === 'dark' 
-                      ? 'text-white/70 hover:text-white' 
-                      : 'text-black/70 hover:text-black'
-                  }`} />
+            
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-medium truncate ${
+                theme === 'dark' ? 'text-white' : 'text-black'
+              }`}>{user?.firstName} {user?.lastName}</p>
+              <p className={`text-xs truncate ${
+                theme === 'dark' ? 'text-white/60' : 'text-black/60'
+              }`}>{user?.emailAddresses?.[0]?.emailAddress}</p>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={handleSettingsClick}
+                className={`p-2 rounded-lg transition-colors ${
+                  theme === 'dark' 
+                    ? 'hover:bg-white/10 text-white/70 hover:text-white' 
+                    : 'hover:bg-black/10 text-black/70 hover:text-black'
+                }`}
+                title="Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              
+              <SignOutButton>
+                <button className={`p-2 rounded-lg transition-colors ${
+                  theme === 'dark' 
+                    ? 'hover:bg-white/10 text-white/70 hover:text-white' 
+                    : 'hover:bg-black/10 text-black/70 hover:text-black'
+                }`}
+                title="Sign Out">
+                  <LogOut className="w-4 h-4" />
                 </button>
-              </div>
-              <SignOutButton />
+              </SignOutButton>
             </div>
           </div>
         </div>

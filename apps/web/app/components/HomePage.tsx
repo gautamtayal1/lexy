@@ -9,6 +9,7 @@ import { setQuestion, clearAttachedFiles, setSelectedModel, setIsCreativeMode, s
 import FilePreview from './chat/FilePreview';
 import ChatInput from './chat/ChatInput';
 import ChatControls from './chat/ChatControls';
+import ErrorNotification from './ErrorNotification';
 
 interface HomePageProps {
   isSidebarOpen: boolean;
@@ -19,6 +20,7 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const [input, setInput] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.theme);
@@ -100,6 +102,10 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
 
   const handleModelChange = (model: string) => {
     dispatch(setSelectedModel(model));
+  };
+
+  const handleCloseError = () => {
+    setApiError(null);
   };
 
   const questions = [
@@ -184,6 +190,12 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
           />
         </div>
       </div>
+      
+      {/* Error Notification */}
+      <ErrorNotification 
+        error={apiError}
+        onClose={handleCloseError}
+      />
     </div>
   );
 };

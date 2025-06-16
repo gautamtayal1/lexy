@@ -13,6 +13,7 @@ import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
 import ChatContainer from './chat/ChatContainer';
 import ShareModal from './chat/ShareModal';
+import ErrorNotification from './ErrorNotification';
 
 interface ChatAreaProps {
   isSidebarOpen: boolean;
@@ -36,6 +37,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   // Use Redux state for creative mode
   const [localIsCreativeMode, setLocalIsCreativeMode] = useState(false);
   const finalIsCreativeMode = isCreativeMode !== undefined ? isCreativeMode : localIsCreativeMode;
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const isThreadExists = useQuery(api.threads.isThreadExists, {
     userId: user?.id || "",
@@ -68,10 +70,46 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
       threadId,
       attachments: file ? file : null,
       apiKeys: apiKeys,
+      isTheoMode: isTheoMode,
       modelParams: {
         temperature: finalIsCreativeMode ? 0.8 : 0.3,
         topK: finalIsCreativeMode ? 50 : 10,
       },
+    },
+    onError: async (error) => {
+      console.error('Chat error:', error);
+      
+      try {
+        // If error has a response property, it might be a fetch error
+        if ((error as any).response) {
+          const response = (error as any).response;
+          if (response.status === 400 || response.status === 401) {
+            try {
+              const errorData = await response.json();
+              if (errorData.error === "API_KEY_REQUIRED" || errorData.error === "INVALID_API_KEY") {
+                setApiError(errorData.message || "Invalid or missing API key. Please check your API key configuration in settings.");
+                return;
+              }
+            } catch (jsonError) {
+              // If we can't parse JSON, fall through to generic handling
+            }
+          }
+        }
+        
+        // Check error message for API key related issues
+        const errorMessage = error.message || String(error);
+        if (errorMessage.includes('400') || 
+            errorMessage.includes('401') || 
+            errorMessage.includes('unauthorized') ||
+            errorMessage.toLowerCase().includes('api key') ||
+            errorMessage.toLowerCase().includes('authentication')) {
+          setApiError("Invalid or missing API key. Please check your API key configuration in settings.");
+        } else {
+          setApiError("An error occurred while processing your request. Please try again.");
+        }
+      } catch (parseError) {
+        setApiError("An unexpected error occurred. Please try again.");
+      }
     }
   })
 
@@ -212,6 +250,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
     dispatch(setSelectedModel(model));
   };
 
+  const handleCloseError = () => {
+    setApiError(null);
+  };
+
   // Get the appropriate messages to display
   const displayMessages = (messages || storedMessages?.map(message => ({
     id: message.messageId,
@@ -275,6 +317,12 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
           onClose={onCloseShareModal}
         />
       )}
+      
+      {/* Error Notification */}
+      <ErrorNotification 
+        error={apiError}
+        onClose={handleCloseError}
+      />
     </div>
   );
 };

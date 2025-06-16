@@ -117,81 +117,61 @@ export default function ChatControls({
         {/* Attach Button */}
         <button
           onClick={handleAttachClick}
-          className={`group relative overflow-hidden rounded-4xl px-3 py-3 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 ${
+          className={`p-3 rounded-3xl font-medium transition-colors ${
             theme === 'dark' 
-              ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/40 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/50 hover:to-slate-700/95 text-slate-300 border border-slate-500/50 hover:border-slate-400/70 shadow-md hover:shadow-slate-500/25' 
-              : 'bg-gradient-to-r from-slate-200/95 via-slate-300/50 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/60 hover:to-slate-300/95 text-slate-700 border border-slate-400/60 hover:border-slate-500/80 shadow-md hover:shadow-slate-500/25'
+              ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20' 
+              : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
           }`}
         >
-          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-            theme === 'dark' 
-              ? 'bg-gradient-to-r from-slate-600/15 to-slate-500/15' 
-              : 'bg-gradient-to-r from-slate-400/10 to-slate-500/10'
-          }`}></div>
-          <Paperclip className="h-4 w-4 relative z-10 transition-transform duration-300 group-hover:rotate-12" />
+          <Paperclip className="h-4 w-4" />
         </button>
         
         {/* Theo Mode Button */}
         <button
-          className={`group relative overflow-hidden rounded-2xl px-3 py-2 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2 text-sm ${
+          className={`px-3 py-2.5 rounded-2xl font-medium transition-colors flex items-center gap-2 text-sm ${
             isTheoMode
               ? theme === 'dark'
-                ? 'bg-gradient-to-r from-slate-700/90 via-slate-600/40 to-blue-800/50 text-white border border-slate-400/60 shadow-md shadow-slate-500/30'
-                : 'bg-gradient-to-r from-slate-300/90 via-slate-400/50 to-blue-200/50 text-slate-800 border border-slate-500/70 shadow-md shadow-slate-500/30'
+                ? 'bg-blue-500/20 text-blue-300 border border-blue-400/50'
+                : 'bg-blue-500/20 text-blue-700 border border-blue-400/50'
               : theme === 'dark' 
-                ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/40 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/50 hover:to-blue-800/40 text-slate-200 border border-slate-600/70 hover:border-slate-400/60 shadow-md hover:shadow-slate-500/20'
-                : 'bg-gradient-to-r from-slate-200/95 via-slate-300/50 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/60 hover:to-blue-200/40 text-slate-700 border border-slate-400/70 hover:border-slate-500/70 shadow-md hover:shadow-slate-500/20'
+                ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
+                : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
           }`}
           onClick={onToggleTheoMode}
         >
-          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-            !isTheoMode && (theme === 'dark' 
-              ? 'bg-gradient-to-r from-slate-600/15 to-blue-600/15' 
-              : 'bg-gradient-to-r from-slate-400/10 to-blue-400/10')
-          }`}></div>
-          <span className="text-base relative z-10 transition-transform duration-300 group-hover:scale-110">🧠</span>
-          <span className="relative z-10 tracking-wide">Theo Mode</span>
+          <span>🧠</span>
+          <span>Theo Mode</span>
         </button>
         
         {/* Creative Mode Button */}
         <button
-          className={`group relative overflow-hidden rounded-2xl px-3 py-2.5 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2 text-sm ${
+          className={`px-3 py-2.5 rounded-2xl font-medium transition-colors flex items-center gap-2 text-sm ${
             isCreativeMode
               ? theme === 'dark'
-                ? 'bg-gradient-to-r from-purple-600/90 via-pink-700/80 to-purple-700/90 text-white border-2 border-purple-400/80 shadow-lg shadow-purple-500/40'
-                : 'bg-gradient-to-r from-purple-400/90 via-pink-300/80 to-purple-500/90 text-white border-2 border-purple-600/80 shadow-lg shadow-purple-500/40'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-400/50'
+                : 'bg-purple-500/20 text-purple-700 border border-purple-400/50'
               : theme === 'dark' 
-                ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/40 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/50 hover:to-purple-800/40 text-slate-200 border border-slate-600/70 hover:border-purple-400/60 shadow-md hover:shadow-purple-500/20'
-                : 'bg-gradient-to-r from-slate-200/95 via-slate-300/50 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/60 hover:to-purple-200/40 text-slate-700 border border-slate-400/70 hover:border-purple-400/70 shadow-md hover:shadow-purple-500/20'
+                ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
+                : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
           }`}
           onClick={handleCreativeToggle}
         >
-          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-            !isCreativeMode && (theme === 'dark' 
-              ? 'bg-gradient-to-r from-slate-600/15 to-purple-600/15' 
-              : 'bg-gradient-to-r from-slate-400/10 to-purple-400/10')
-          }`}></div>
-          <Sparkles className="h-4 w-4 relative z-10 transition-transform duration-300 group-hover:scale-110" />
-          <span className="relative z-10 tracking-wide">Creative</span>
+          <Sparkles className="h-4 w-4" />
+          <span>Creative</span>
         </button>
       </div>
       
       <div className="flex items-center gap-3">
         <ModelDropdown selectedModel={selectedModel} onModelChange={onModelChange} />
         <button  
-          className={`group relative overflow-hidden transition-all duration-300 ease-out px-3 py-3 rounded-3xl hover:scale-105 active:scale-95 ${
+          className={`p-3 rounded-3xl transition-colors ${
             theme === 'dark' 
-              ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/50 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/60 hover:to-emerald-800/40 text-slate-200 border border-slate-500/50 hover:border-slate-400/70 shadow-md hover:shadow-slate-500/25' 
-              : 'bg-gradient-to-r from-slate-200/95 via-slate-300/60 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/70 hover:to-emerald-200/40 text-slate-700 border border-slate-400/60 hover:border-slate-500/80 shadow-md hover:shadow-slate-500/25'
+              ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20' 
+              : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
           }`}
           onClick={onSubmit}
         >
-          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-            theme === 'dark' 
-              ? 'bg-gradient-to-r from-slate-600/15 to-emerald-600/15' 
-              : 'bg-gradient-to-r from-slate-400/10 to-emerald-400/10'
-          }`}></div>
-          <ArrowUp className="h-4 w-4 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5" />
+          <ArrowUp className="h-4 w-4 " />
         </button>
       </div>
     </div>
