@@ -12,6 +12,7 @@ interface ChatState {
   question: string;
   selectedModel: string;
   isCreativeMode: boolean;
+  isTheoMode: boolean;
   attachedFiles: AttachedFile[];
 }
 
@@ -19,6 +20,7 @@ const initialState: ChatState = {
   question: '',
   selectedModel: 'deepseek-r1-distill-llama-70b',
   isCreativeMode: false,
+  isTheoMode: false,
   attachedFiles: [],
 };
 
@@ -34,6 +36,9 @@ const chatSlice = createSlice({
     },
     setIsCreativeMode: (state, action: PayloadAction<boolean>) => {
       state.isCreativeMode = action.payload;
+    },
+    setIsTheoMode: (state, action: PayloadAction<boolean>) => {
+      state.isTheoMode = action.payload;
     },
     addAttachedFile: (state, action: PayloadAction<AttachedFile>) => {
       state.attachedFiles.push(action.payload);
@@ -56,6 +61,7 @@ export const {
   setQuestion,
   setSelectedModel,
   setIsCreativeMode,
+  setIsTheoMode,
   addAttachedFile,
   removeAttachedFile,
   clearAttachedFiles,

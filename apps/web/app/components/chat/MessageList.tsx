@@ -43,9 +43,8 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
     } catch (err) {
       console.error('Failed to copy message: ', err);
     }
-  };
-
-  // Check if we're currently streaming and if the last message is from assistant
+  }
+  
   const isStreamingAssistantMessage = (status === 'submitted' || status === 'streaming') && 
     messages.length > 0 && 
     messages[messages.length - 1]?.role === 'assistant';

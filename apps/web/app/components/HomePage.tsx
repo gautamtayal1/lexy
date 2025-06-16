@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom';
 import { Menu } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setQuestion, clearAttachedFiles, setSelectedModel, setIsCreativeMode } from '../store/chatSlice';
+import { setQuestion, clearAttachedFiles, setSelectedModel, setIsCreativeMode, setIsTheoMode } from '../store/chatSlice';
 import FilePreview from './chat/FilePreview';
 import ChatInput from './chat/ChatInput';
 import ChatControls from './chat/ChatControls';
@@ -22,7 +22,7 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.theme);
-  const { selectedModel, isCreativeMode } = useAppSelector((state) => state.chat);
+  const { selectedModel, isCreativeMode, isTheoMode } = useAppSelector((state) => state.chat);
 
   // Clear files when component unmounts (when navigating away)
   useEffect(() => {
@@ -39,6 +39,7 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
     
     // Store the question in Redux state
     dispatch(setQuestion(input));
+    
     
     // Store uploaded files in session storage for the new chat BEFORE clearing them
     if (uploadedFiles.length > 0) {
@@ -91,6 +92,10 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
 
   const handleToggleCreativeMode = () => {
     dispatch(setIsCreativeMode(!isCreativeMode));
+  };
+
+  const handleToggleTheoMode = () => {
+    dispatch(setIsTheoMode(!isTheoMode));
   };
 
   const handleModelChange = (model: string) => {
@@ -169,6 +174,8 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
           <ChatControls
             isCreativeMode={isCreativeMode}
             onToggleCreativeMode={handleToggleCreativeMode}
+            isTheoMode={isTheoMode}
+            onToggleTheoMode={handleToggleTheoMode}
             selectedModel={selectedModel}
             onModelChange={handleModelChange}
             onFileUpload={handleFileUpload}

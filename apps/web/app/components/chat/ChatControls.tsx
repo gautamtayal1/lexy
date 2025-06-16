@@ -9,6 +9,8 @@ import { useAppSelector } from '../../store/hooks';
 interface ChatControlsProps {
   isCreativeMode: boolean;
   onToggleCreativeMode: () => void;
+  isTheoMode: boolean;
+  onToggleTheoMode: () => void;
   selectedModel: string;
   onModelChange: (model: string) => void;
   onFileUpload: (files: any[]) => void;
@@ -19,6 +21,8 @@ interface ChatControlsProps {
 export default function ChatControls({
   isCreativeMode,
   onToggleCreativeMode,
+  isTheoMode,
+  onToggleTheoMode,
   selectedModel,
   onModelChange,
   onFileUpload,
@@ -29,17 +33,33 @@ export default function ChatControls({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <button
           className={`border rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl flex items-center gap-2 ${
-            theme === 'dark' 
-              ? `bg-white/10 hover:bg-white/20 text-white border-white/20 ${isCreativeMode ? 'bg-white/20' : 'bg-pink-600'}`
-              : `bg-black/10 hover:bg-black/20 text-black border-black/20 ${isCreativeMode ? 'bg-black/20' : ''}`
+            isCreativeMode
+              ? 'bg-[#171824] text-white border-slate-600 hover:bg-slate-700'
+              : theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                : 'bg-black/10 hover:bg-black/20 text-black border-black/20'
           }`}
           onClick={onToggleCreativeMode}
         >
           <Sparkles className="h-4 w-4" />
           Creative
+        </button>
+        
+        <button
+          className={`border rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 backdrop-blur-xl flex items-center gap-2 ${
+            isTheoMode
+              ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+              : theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                : 'bg-black/10 hover:bg-black/20 text-black border-black/20'
+          }`}
+          onClick={onToggleTheoMode}
+        >
+          🧠
+          Theo
         </button>
         
         <div className={`rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${

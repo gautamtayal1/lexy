@@ -5,7 +5,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 import { createGroq } from "@ai-sdk/groq";
 import { openai } from "@ai-sdk/openai";
-import { createPartFromUri, createUserContent, GoogleGenAI, Modality } from "@google/genai";
+import {  GoogleGenAI, Modality } from "@google/genai";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { THEO_MODE_SYSTEM_PROMPT } from "@/app/lib/prompts/theo";
 

@@ -6,7 +6,7 @@ import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { resetChatState, setSelectedModel } from '../store/chatSlice';
+import { resetChatState, setSelectedModel, setIsTheoMode } from '../store/chatSlice';
 import { useApiKeys } from '../hooks/useApiKeys';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
@@ -27,7 +27,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { question, selectedModel, isCreativeMode, attachedFiles } = useAppSelector((state) => state.chat);
+  const { question, selectedModel, isCreativeMode, isTheoMode, attachedFiles } = useAppSelector((state) => state.chat);
   const theme = useAppSelector((state) => state.theme.theme);
   const { apiKeys } = useApiKeys();
   const threadId = pathname.split('/')[2];
@@ -121,6 +121,11 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
 
         append({ role: 'user', content: question })
 
+        // Clear file state after initial message to prevent files from being sent with subsequent messages
+        setTimeout(() => {
+          setFile(null);
+        }, 100);
+
         const setThreadTitle = async () => {
           await axios.post("/api/thread/title", {
             threadId,
@@ -190,13 +195,17 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
 
   const handleSubmitWithCleanup = () => {
     handleSubmit();
-    // Clear both file states immediately after sending
+    // Clear both file states immediately after sending to prevent them from being included in subsequent messages
     setFile(null);
     setUploadedFiles([]);
   };
 
   const handleToggleCreativeMode = () => {
     setLocalIsCreativeMode(!localIsCreativeMode);
+  };
+
+  const handleToggleTheoMode = () => {
+    dispatch(setIsTheoMode(!isTheoMode));
   };
 
   const handleModelChange = (model: string) => {
@@ -222,11 +231,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
             ? 'border-white/20 bg-white/5' 
             : 'border-black/20 bg-black/5'
         }`}
-        style={{
-          clipPath: threadDetails && displayMessages.length > 0 
-            ? 'polygon(0 0, calc(100% - 60px) 0, calc(100% - 60px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 56px, 100% 56px, 100% 100%, 0 100%)'
-            : 'none'
-        }}
       >
         {!isSidebarOpen && (
           <button 
@@ -241,7 +245,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
           </button>
         )}
 
-              <ChatContainer
+                    <ChatContainer
         messages={displayMessages as any}
         messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
         uploadedFiles={uploadedFiles}
@@ -251,6 +255,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
         onSubmit={handleSubmitWithCleanup}
         isCreativeMode={finalIsCreativeMode}
         onToggleCreativeMode={handleToggleCreativeMode}
+        isTheoMode={isTheoMode}
+        onToggleTheoMode={handleToggleTheoMode}
         selectedModel={selectedModel}
         onModelChange={handleModelChange}
         onFileUpload={handleFileUpload}

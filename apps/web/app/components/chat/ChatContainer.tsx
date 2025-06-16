@@ -36,6 +36,8 @@ interface ChatContainerProps {
   onSubmit: () => void;
   isCreativeMode: boolean;
   onToggleCreativeMode: () => void;
+  isTheoMode: boolean;
+  onToggleTheoMode: () => void;
   selectedModel: string;
   onModelChange: (model: string) => void;
   onFileUpload: (files: any[]) => void;
@@ -53,6 +55,8 @@ export default function ChatContainer({
   onSubmit,
   isCreativeMode,
   onToggleCreativeMode,
+  isTheoMode,
+  onToggleTheoMode,
   selectedModel,
   onModelChange,
   onFileUpload,
@@ -82,6 +86,8 @@ export default function ChatContainer({
           <ChatControls
             isCreativeMode={isCreativeMode}
             onToggleCreativeMode={onToggleCreativeMode}
+            isTheoMode={isTheoMode}
+            onToggleTheoMode={onToggleTheoMode}
             selectedModel={selectedModel}
             onModelChange={onModelChange}
             onFileUpload={onFileUpload}
