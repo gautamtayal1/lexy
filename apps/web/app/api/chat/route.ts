@@ -305,6 +305,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    let response = ""
     const result = await streamText({
       model: aiProvider,
       system: isTheoMode ? THEO_MODE_SYSTEM_PROMPT : LEXY_SYSTEM_PROMPT,
@@ -329,25 +330,21 @@ export async function POST(request: NextRequest) {
         : messages,
       topK: modelParams.topK,
       temperature: modelParams.temperature,
-      // async onChunk({chunk}) {
-      //   await convex.mutation(api.messages.patchMessage, {
-      //     messageId: assistantMessageId,
-      //     content: chunk.type === "text-delta" ? chunk.textDelta : chunk.text,
-      //     status: "completed",
-      //   });
-      // },
-      async onFinish({ text, reasoning }) {
-        console.log('text', text)
-        console.log('reasoning', reasoning)
-        await convex.mutation(api.messages.patchMessage, {
-          messageId: assistantMessageId,
-          content: text,
-          status: "completed",
-          modelResponse: reasoning,
-        });
-      },
+      async onChunk({chunk}) {
+        if(chunk.type === "text-delta") {
+        response += chunk.textDelta
+      }
+    }
     })
 
+    setInterval(async() => {
+      await convex.mutation(api.messages.patchMessage, {
+        messageId: assistantMessageId,
+        content: response,
+        status: "completed",
+      });
+    }, 1000);
+    
     return result.toDataStreamResponse({
       sendReasoning: true,
       sendSources: true,

@@ -61,8 +61,6 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
         {messages.map((message, index) => {
           const isLastMessage = index === messages.length - 1;
           const isStreamingThisMessage = isStreamingAssistantMessage && isLastMessage;
-          console.log('message', message)
-          
           return (
             <div key={message.id || message.messageId} className="space-y-2 mb-6">
               {message.role === 'assistant' && message.reasoning && (

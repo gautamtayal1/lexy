@@ -234,7 +234,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const handleCloseError = () => {
     setApiError(null);
   };
-  
+
   const displayMessages = (messages || storedMessages?.map(message => ({
     id: message.messageId,
     role: message.role as 'user' | 'assistant' | 'system',
@@ -267,7 +267,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
           </button>
         )}
 
-                    <ChatContainer
+      <ChatContainer
         messages={displayMessages as any}
         messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
         uploadedFiles={uploadedFiles}
