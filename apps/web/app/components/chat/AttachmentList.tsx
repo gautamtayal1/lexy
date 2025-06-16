@@ -13,8 +13,6 @@ interface AttachmentListProps {
 
 export default function AttachmentList({ messageId, messageRole }: AttachmentListProps) {
   const theme = useAppSelector((state) => state.theme.theme);
-  
-  // Only query if messageId exists and is not empty
   const attachments = useQuery(
     api.attachments.getAttachmentsByMessageId, 
     messageId && messageId.trim() !== "" ? { messageId } : "skip"
@@ -24,9 +22,7 @@ export default function AttachmentList({ messageId, messageRole }: AttachmentLis
     return null;
   }
 
-  // Different layouts for user vs assistant messages
   if (messageRole === 'user') {
-    // Group images into columns of 3
     const columns = [];
     for (let i = 0; i < attachments.length; i += 3) {
       columns.push(attachments.slice(i, i + 3));
@@ -61,8 +57,7 @@ export default function AttachmentList({ messageId, messageRole }: AttachmentLis
       </div>
     );
   }
-
-  // Assistant images - larger and full width
+  
   return (
     <div className="mt-3 space-y-2 flex flex-col items-start">
       {attachments.map((attachment) => (

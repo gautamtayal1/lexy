@@ -19,7 +19,6 @@ export default function ChatInput({ input, onInputChange, onSubmit, placeholder 
         value={input}
         onChange={(e) => {
           onInputChange(e);
-          // Auto-resize textarea
           e.target.style.height = 'auto';
           e.target.style.height = `${Math.min(e.target.scrollHeight, 240)}px`;
         }}

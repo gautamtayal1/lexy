@@ -18,7 +18,7 @@ interface ChatState {
 
 const initialState: ChatState = {
   question: '',
-  selectedModel: 'deepseek-r1-distill-llama-70b',
+  selectedModel: 'llama-3.3-70b-versatile',
   isCreativeMode: false,
   isTheoMode: false,
   attachedFiles: [],
@@ -52,7 +52,6 @@ const chatSlice = createSlice({
     resetChatState: (state) => {
       state.question = '';
       state.attachedFiles = [];
-      // Keep model and creativity settings
     },
   },
 });

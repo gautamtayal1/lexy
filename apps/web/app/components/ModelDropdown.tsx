@@ -15,8 +15,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
   const dropdownRef = useRef<HTMLDivElement>(null);
   const theme = useAppSelector((state) => state.theme.theme);
   const { hasOpenRouterKey, hasOpenAIKey, hasGeminiKey } = useApiKeys();
-
-  // Track when component has hydrated
+  
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -25,18 +24,16 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     { id: "openai/gpt-4.1-mini", name: "GPT-4.1", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
     { id: "openai/o4-mini", name: "O4-mini", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
     { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7", logo: "/claude.png", company: "Anthropic", requiresKey: "openrouter" },
-    { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek", logo: "/deepseek.jpg", company: "DeepSeek", requiresKey: null }, // Free model via Groq
     { id: "llama-3.3-70b-versatile", name: "Llama 3.3", logo: "/meta.png", company: "Meta", requiresKey: null }, // Free model via Groq
     { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0", logo: "/gemini.jpg", company: "Google", requiresKey: "openrouter" },
     { id: "google/gemini-2.5-pro-preview", name: "Gemini 2.5", logo: "/gemini.jpg", company: "Google", requiresKey: "openrouter" },
     { id: "openai/gpt-4o-2024-11-20", name: "GPT-4o", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
-    { id: "gpt-image-1", name: "GPT ImageGen", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openai" }, // Direct OpenAI image gen
-    { id: "gemini-2.0-flash-preview-image-generation", name: "Gemini ImageGen", logo: "/gemini.jpg", company: "Google", requiresKey: "gemini" }, // Direct Gemini image gen
+    { id: "gpt-image-1", name: "GPT ImageGen", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openai" }, 
+    { id: "gemini-2.0-flash-preview-image-generation", name: "Gemini ImageGen", logo: "/gemini.jpg", company: "Google", requiresKey: "gemini" }, 
   ];
 
-  // Check if a model is available
   const isModelAvailable = (model: any) => {
-    if (!model.requiresKey) return true; // Free models
+    if (!model.requiresKey) return true; 
     
     switch (model.requiresKey) {
       case "openrouter":
@@ -50,16 +47,13 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     }
   };
 
-  // Separate available and unavailable models
   const availableModels = allModels.filter(isModelAvailable);
   const unavailableModels = allModels.filter(model => !isModelAvailable(model));
 
   const selectedModelData = allModels.find(m => m.id === selectedModel);
 
-  // If selected model is not available anymore, switch to a free model (only after hydration)
   useEffect(() => {
     if (isHydrated && selectedModelData && !isModelAvailable(selectedModelData)) {
-      // Default to first free model (DeepSeek or Llama)
       const freeModel = availableModels.find(m => !m.requiresKey) || availableModels[0];
       if (freeModel) {
         onModelChange(freeModel.id);
@@ -107,7 +101,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
         }`} />
       </button>
 
-      {/* Backdrop */}
       <div 
         className={`fixed inset-0 transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -115,7 +108,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Dropdown */}
       <div className={`absolute bottom-full mb-3 right-0 w-80 transform transition-all duration-500 ease-out ${
         isOpen 
           ? 'opacity-100 translate-y-0 scale-100' 
@@ -126,7 +118,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
             ? 'bg-base' 
             : 'bg-gradient-to-br from-white/95 via-slate-100/95 to-orange-100/95 border-orange-400/30 shadow-orange-500/10'
         }`}>
-          {/* Header */}
           <div className={`px-5 py-3 border-b ${
             theme === 'dark' ? 'border-orange-500/10' : 'border-orange-400/20'
           }`}>
@@ -137,9 +128,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
             </h3>
           </div>
 
-          {/* Models List */}
           <div className="max-h-80 overflow-y-auto custom-scrollbar">
-            {/* Available Models */}
             {availableModels.map((model, index) => (
               <button
                 key={model.id}
@@ -156,14 +145,12 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                     : `text-slate-700 hover:bg-gradient-to-r hover:from-slate-200/60 hover:via-orange-200/40 hover:to-slate-200/60 hover:shadow-md ${selectedModel === model.id ? 'bg-gradient-to-r from-slate-200/80 via-orange-200/50 to-slate-200/80 shadow-md' : ''}`
                 }`}
               >
-                {/* Animated background gradient */}
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
                   theme === 'dark' 
                     ? 'bg-gradient-to-r from-orange-600/3 to-slate-600/10' 
                     : 'bg-gradient-to-r from-orange-400/5 to-slate-400/5'
                 }`}></div>
 
-                {/* Logo */}
                 <div className="relative flex-shrink-0 z-10">
                   {model.logo ? (
                     <div className="relative">
@@ -187,7 +174,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                   )}
                 </div>
 
-                {/* Text Content */}
                 <div className="flex-1 min-w-0 z-10">
                   <div className={`text-xs font-medium truncate transition-colors duration-300 ${
                     theme === 'dark' ? 'text-slate-300 group-hover:text-orange-300/80' : 'text-slate-600 group-hover:text-orange-600'
@@ -210,21 +196,18 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                   </div>
                 </div>
 
-                {/* Selection indicator */}
                 {selectedModel === model.id && (
                   <div className="flex-shrink-0 z-10">
                     <div className="w-2 h-2 rounded-full bg-orange-500/80 animate-pulse"></div>
                   </div>
                 )}
 
-                {/* Hover line effect */}
                 <div className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 group-hover:w-full w-0 ${
                   theme === 'dark' ? 'bg-gradient-to-r from-orange-400/40 to-slate-400' : 'bg-gradient-to-r from-orange-500/60 to-slate-500'
                 }`}></div>
               </button>
             ))}
 
-            {/* Unavailable Models (Disabled) */}
             {unavailableModels.map((model, index) => (
               <div
                 key={`disabled-${model.id}`}
@@ -235,7 +218,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                   theme === 'dark' ? 'text-white/40' : 'text-black/40'
                 }`}
               >
-                {/* Logo */}
                 <div className="relative flex-shrink-0 z-10">
                   {model.logo ? (
                     <Image
@@ -253,8 +235,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
                     </div>
                   )}
                 </div>
-
-                {/* Text Content */}
                 <div className="flex-1 min-w-0 z-10">
                   <div className="text-xs font-medium truncate">
                     {model.company}
@@ -273,7 +253,6 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
               </div>
             ))}
             
-            {/* No models available message */}
             {availableModels.length === 0 && (
               <div className={`px-5 py-6 text-center ${
                 theme === 'dark' ? 'text-white/70' : 'text-black/70'

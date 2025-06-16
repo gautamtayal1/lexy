@@ -16,7 +16,6 @@ const tabs = [
 export default function SettingsTabPanel({ activeTab, onTabChange }: SettingsTabPanelProps) {
   return (
     <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 h-full flex flex-col">
-      {/* Tab Bar */}
       <div className="flex border-b border-white/20 p-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -36,8 +35,7 @@ export default function SettingsTabPanel({ activeTab, onTabChange }: SettingsTab
           );
         })}
       </div>
-
-      {/* Tab Content */}
+        
       <div className="flex-1 p-6 overflow-y-auto">
         {activeTab === 'customization' && <CustomizationContent />}
         {activeTab === 'history' && <HistoryContent />}
@@ -173,7 +171,6 @@ function ApiKeysContent() {
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Initialize temp keys when apiKeys change
   useEffect(() => {
     setTempKeys(apiKeys);
   }, [apiKeys]);
@@ -181,7 +178,6 @@ function ApiKeysContent() {
   const handleKeyChange = (provider: keyof ApiKeyConfig, value: string) => {
     setTempKeys(prev => ({ ...prev, [provider]: value }));
     
-    // Clear validation error when user starts typing
     if (validationErrors[provider]) {
       setValidationErrors(prev => ({ ...prev, [provider]: '' }));
     }
@@ -191,7 +187,6 @@ function ApiKeysContent() {
     const key = tempKeys[provider];
     
     if (!key || !key.trim()) {
-      // Remove the key if empty
       removeApiKey(provider);
       setValidationErrors(prev => ({ ...prev, [provider]: '' }));
       return;
@@ -216,7 +211,6 @@ function ApiKeysContent() {
       return;
     }
 
-    // Save the key
     saveApiKeys({ ...apiKeys, [provider]: key });
     setValidationErrors(prev => ({ ...prev, [provider]: '' }));
   };

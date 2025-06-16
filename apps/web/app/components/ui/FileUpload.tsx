@@ -8,7 +8,7 @@ interface FileUploadProps {
   onUploadComplete?: (files: any[]) => void;
   onUploadError?: (error: string) => void;
   maxFiles?: number;
-  maxFileSize?: number; // in MB
+  maxFileSize?: number; 
   acceptedFileTypes?: string[];
   className?: string;
   children?: React.ReactNode;
@@ -33,13 +33,11 @@ export default function FileUpload({
     
     if (files.length === 0) return;
 
-    // Validate file count
     if (files.length > maxFiles) {
       onUploadError?.(` You can only upload up to ${maxFiles} files at once.`);
       return;
     }
 
-    // Validate file sizes and types
     for (const file of files) {
       if (file.size > maxFileSize * 1024 * 1024) {
         onUploadError?.(`File ${file.name} is too large. Maximum size is ${maxFileSize}MB.`);
@@ -61,7 +59,6 @@ export default function FileUpload({
 
     setIsUploading(true);
 
-    // Notify upload start with loading files
     const loadingFiles = files.map(file => ({
       name: file.name,
       size: file.size,
@@ -93,8 +90,7 @@ export default function FileUpload({
       console.error('Upload error:', error);
       onUploadError?.(error instanceof Error ? error.message : 'Upload failed');
     } finally {
-      setIsUploading(false);
-      // Reset the input
+      setIsUploading(false);  
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

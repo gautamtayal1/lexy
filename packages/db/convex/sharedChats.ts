@@ -9,7 +9,6 @@ export const createSharedChat = mutation({
     isPublic: v.optional(v.boolean()),
   },
   handler: async (ctx, { threadId, ownerId, title, isPublic = true }) => {
-    // Check if thread exists and belongs to the owner
     const thread = await ctx.db
       .query("threads")
       .withIndex("byUserId", (q) => q.eq("userId", ownerId))
@@ -20,10 +19,8 @@ export const createSharedChat = mutation({
       throw new Error("Thread not found or you don't have permission to share it");
     }
 
-    // Generate a unique share ID
     const shareId = crypto.randomUUID();
 
-    // Create shared chat entry
     const sharedChatId = await ctx.db.insert("sharedChats", {
       shareId,
       threadId,
@@ -65,7 +62,6 @@ export const getSharedChatMessages = query({
       throw new Error("Shared chat not found");
     }
 
-    // Get messages for this thread
     const messages = await ctx.db
       .query("messages")
       .withIndex("byThreadId", (q) => q.eq("threadId", sharedChat.threadId))

@@ -67,8 +67,6 @@ export default function SharedChatPage() {
   }
 
   const { sharedChat, messages } = sharedChatData;
-
-  // Convert messages to the format expected by MessageList
   const displayMessages = messages.map(message => ({
     id: message.messageId,
     role: message.role as 'user' | 'assistant' | 'system',

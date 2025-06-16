@@ -49,7 +49,6 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
     messages.length > 0 && 
     messages[messages.length - 1]?.role === 'assistant';
 
-  // Show loading only if we're waiting for content and the last assistant message is empty
   const shouldShowLoading = (status === 'submitted') && 
     (messages.length === 0 || 
      (messages.length > 0 && 

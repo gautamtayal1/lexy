@@ -15,7 +15,6 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 const groqModels = [
   "llama-3.3-70b-versatile",
-  "deepseek-r1-distill-llama-70b",
 ]
 
 const openrouterModels = [
@@ -28,7 +27,6 @@ const openrouterModels = [
 
 const apiKey = process.env.VERTEX_API_KEY;
 
-// Configure DO Spaces client
 const s3Client = new S3Client({
   endpoint: `https://${process.env.DO_SPACES_REGION}.digitaloceanspaces.com`,
   region: process.env.DO_SPACES_REGION,
@@ -86,7 +84,6 @@ export async function POST(request: NextRequest) {
       status: "completed",
       modelParams,
       messageId: userMessageId,
-      // attachments: fileUrl ? [fileUrl] : undefined,
     })
 
     const assistantMessageId = crypto.randomUUID();
@@ -102,13 +99,12 @@ export async function POST(request: NextRequest) {
     })
     
     if (attachments) {
-      // Handle both single attachment and array of attachments
       const attachmentArray = Array.isArray(attachments) ? attachments : [attachments];
       
       for (const attachment of attachmentArray) {
         await convex.mutation(api.attachments.addAttachment, {
           userId,
-          messageId: userMessageId, // Fix: Attach to user message, not assistant message
+          messageId: userMessageId, 
           attachmentUrl: attachment.url,
           fileName: attachment.name,
           fileType: attachment.type,
@@ -140,7 +136,6 @@ export async function POST(request: NextRequest) {
           }
         });
       for (const part of response.candidates?.[0]?.content?.parts ?? []) {
-        // Based on the part type, either show the text or save the image
         if (part.text) {
           console.log(part.text);
         } else if (part.inlineData) {
@@ -255,17 +250,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create AI providers
     let aiProvider;
     if (groqModels.includes(model)) {
-      // Use your Groq API key for Groq models
       if (!process.env.GROQ_API_KEY) {
         return new Response("Groq API key not configured on server.", { status: 500 });
       }
       const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
       aiProvider = groq(model);
     } else if (model === "gpt-image-1") {
-      // For OpenAI direct models, use user's OpenAI key
       if (!apiKeys?.openai) {
         return new Response(JSON.stringify({ 
           error: "API_KEY_REQUIRED",
@@ -278,7 +270,6 @@ export async function POST(request: NextRequest) {
       const openaiProvider = createOpenAI({ apiKey: apiKeys.openai });
       aiProvider = openaiProvider(model);
     } else if (model === "gemini-2.0-flash-preview-image-generation") {
-      // For Gemini models, check for API key
       if (!apiKeys?.gemini) {
         return new Response(JSON.stringify({ 
           error: "API_KEY_REQUIRED",
@@ -288,13 +279,11 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      // Gemini models are handled separately above, this is just for consistency
       return new Response(JSON.stringify({ success: true }), { 
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
-      // Use user's OpenRouter key or fallback to server key
       const openrouterApiKey = apiKeys?.openrouter || process.env.OPENROUTER_API_KEY;
       if (!openrouterApiKey) {
         return new Response(JSON.stringify({ 
@@ -309,7 +298,6 @@ export async function POST(request: NextRequest) {
       aiProvider = openrouter(model);
     }
 
-    // Skip streamText for image generation models  
     if (model === "gpt-image-1") {
       return new Response(JSON.stringify({ success: true }), { 
         status: 200,
@@ -368,7 +356,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Chat API error:', error);
     
-    // Check for API key related errors
     const errorMessage = error instanceof Error ? error.message : String(error);
     
     if (errorMessage.includes('401') || 

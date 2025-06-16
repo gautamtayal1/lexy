@@ -26,7 +26,6 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   const theme = useAppSelector((state) => state.theme.theme);
   const { selectedModel, isCreativeMode, isTheoMode } = useAppSelector((state) => state.chat);
 
-  // Clear files when component unmounts (when navigating away)
   useEffect(() => {
     return () => {
       setUploadedFiles([]);
@@ -39,24 +38,18 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
     if (e) e.preventDefault();
     if (!input.trim() || isSubmitting) return;
     
-    // Store the question in Redux state
     dispatch(setQuestion(input));
     
-    
-    // Store uploaded files in session storage for the new chat BEFORE clearing them
     if (uploadedFiles.length > 0) {
       sessionStorage.setItem('pendingFiles', JSON.stringify(uploadedFiles));
     }
     
-    // IMMEDIATELY clear the visual state to hide preview
     setIsSubmitting(true);
     setInput("");
     setUploadedFiles([]);
     
-    // Generate ID and navigate
     const id = crypto.randomUUID();
     
-    // Navigate immediately since we've already cleared the UI
     router.push(`/chat/${id}`);
   };
 
@@ -65,7 +58,6 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   };
 
   const handleQuestionClick = (question: string) => {
-    // Clear any uploaded files when clicking preset questions
     setUploadedFiles([]);
     dispatch(clearAttachedFiles());
     
@@ -75,14 +67,11 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
   };
 
   const handleFileUploadStart = (files: any[]) => {
-    // Add loading files to preview immediately
     setUploadedFiles(prev => [...prev, ...files]);
   };
 
   const handleFileUpload = (files: any[]) => {
-    // Replace the loading files with the actual uploaded files
     setUploadedFiles(prev => {
-      // Remove all loading files and add the actual uploaded files
       const nonLoadingFiles = prev.filter(f => !f.isUploading);
       return [...nonLoadingFiles, ...files];
     });
@@ -191,7 +180,6 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
         </div>
       </div>
       
-      {/* Error Notification */}
       <ErrorNotification 
         error={apiError}
         onClose={handleCloseError}

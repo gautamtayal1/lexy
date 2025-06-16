@@ -35,7 +35,6 @@ export default function ChatControls({
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
-    // Validate file count and size
     if (files.length > 5) {
       alert("You can only upload up to 5 files at once.");
       return;
@@ -51,8 +50,7 @@ export default function ChatControls({
         return;
       }
     }
-
-    // Notify upload start
+    
     const loadingFiles = files.map(file => ({
       name: file.name,
       size: file.size,
@@ -84,7 +82,6 @@ export default function ChatControls({
       console.error('Upload error:', error);
       alert(error instanceof Error ? error.message : 'Upload failed');
     } finally {
-      // Reset the input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -104,7 +101,6 @@ export default function ChatControls({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2.5">
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -114,7 +110,6 @@ export default function ChatControls({
           className="hidden"
         />
         
-        {/* Attach Button */}
         <button
           onClick={handleAttachClick}
           className={`p-3 rounded-3xl font-medium transition-colors ${
@@ -126,7 +121,6 @@ export default function ChatControls({
           <Paperclip className="h-4 w-4" />
         </button>
         
-        {/* Theo Mode Button */}
         <button
           className={`px-3 py-2.5 rounded-2xl font-medium transition-colors flex items-center gap-2 text-sm ${
             isTheoMode
@@ -143,7 +137,6 @@ export default function ChatControls({
           <span>Theo Mode</span>
         </button>
         
-        {/* Creative Mode Button */}
         <button
           className={`px-3 py-2.5 rounded-2xl font-medium transition-colors flex items-center gap-2 text-sm ${
             isCreativeMode

@@ -125,7 +125,6 @@ export const deleteThread = mutation({
       throw new Error("Thread not found");
     }
 
-    // Delete all messages in this thread
     const messages = await ctx.db
       .query("messages")
       .withIndex("byThreadId", (q) => q.eq("threadId", threadId))
@@ -135,7 +134,7 @@ export const deleteThread = mutation({
       await ctx.db.delete(message._id);
     }
 
-    // Delete the thread
+
     await ctx.db.delete(thread._id);
 
     return true;

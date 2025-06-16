@@ -4,7 +4,6 @@ import { getAuth } from "@clerk/nextjs/server";
 
 export const runtime = "edge";
 
-// Configure DO Spaces client
 const s3Client = new S3Client({
   endpoint: `https://${process.env.DO_SPACES_REGION}.digitaloceanspaces.com`,
   region: process.env.DO_SPACES_REGION,
@@ -16,7 +15,6 @@ const s3Client = new S3Client({
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,14 +30,12 @@ export async function POST(request: NextRequest) {
     const uploadResults = [];
 
     for (const file of files) {
-      // Validate file size (20MB limit)
       if (file.size > 20 * 1024 * 1024) {
         return NextResponse.json({ 
           error: `File ${file.name} is too large. Maximum size is 20MB.` 
         }, { status: 400 });
-      }
+      } 
 
-      // Validate file type (images only for now)
       if (!file.type.startsWith('image/')) {
         return NextResponse.json({ 
           error: `File ${file.name} is not an image.` 

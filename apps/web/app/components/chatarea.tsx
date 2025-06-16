@@ -34,7 +34,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const threadId = pathname.split('/')[2];
   const [file, setFile] = useState<any | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  // Use Redux state for creative mode
   const [localIsCreativeMode, setLocalIsCreativeMode] = useState(false);
   const finalIsCreativeMode = isCreativeMode !== undefined ? isCreativeMode : localIsCreativeMode;
   const [apiError, setApiError] = useState<string | null>(null);
@@ -82,7 +81,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
       console.error('Chat error:', error);
       
       try {
-        // If error has a response property, it might be a fetch error
         if ((error as any).response) {
           const response = (error as any).response;
           if (response.status === 400 || response.status === 401) {
@@ -93,12 +91,10 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
                 return;
               }
             } catch (jsonError) {
-              // If we can't parse JSON, fall through to generic handling
             }
           }
         }
         
-        // Check error message for API key related issues
         const errorMessage = error.message || String(error);
         if (errorMessage.includes('400') || 
             errorMessage.includes('401') || 
@@ -118,7 +114,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const [hasHydratedHistory, setHasHydratedHistory] = useState(false);
 
   useEffect(() => {
-    if (storedMessages) {
+    if (storedMessages && !hasHydratedHistory) {
       const ordered = [...storedMessages].sort(
         (a, b) => a.createdAt - b.createdAt
       );
@@ -134,21 +130,17 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
       setMessages(history);
       setHasHydratedHistory(true);
     }
-  }, [hasHydratedHistory, storedMessages, setMessages]);
+  }, [storedMessages, setMessages, hasHydratedHistory]);
 
   useEffect(() => {
-    if (!isInitialized) {
+    if (!isInitialized && hasHydratedHistory) {
       if (question) {
-        // Check for pending files from homepage
         const pendingFiles = sessionStorage.getItem('pendingFiles');
         if (pendingFiles) {
           try {
             const files = JSON.parse(pendingFiles);
-            // Only set files for API, NOT for preview since they'll be sent immediately
             setFile(files);
-            // Ensure uploadedFiles stays empty so no preview shows
             setUploadedFiles([]);
-            // Clear the session storage
             sessionStorage.removeItem('pendingFiles');
           } catch (error) {
             console.error('Error parsing pending files:', error);
@@ -157,7 +149,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
 
         append({ role: 'user', content: question })
 
-        // Clear file state after initial message to prevent files from being sent with subsequent messages
         setTimeout(() => {
           setFile(null);
         }, 100);
@@ -174,7 +165,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
         dispatch(resetChatState());
       }
     }
-  }, [isInitialized, question]);
+  }, [isInitialized, question, user?.id, threadId, dispatch, hasHydratedHistory, append]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -191,10 +182,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const handleRemoveFile = (index: number) => {
     const fileToRemove = uploadedFiles[index];
     
-    // Remove from preview
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
     
-    // Remove from API file state by matching URL and name
     setFile((prevFiles: any) => {
       if (!prevFiles) return null;
       const updatedFiles = prevFiles.filter((f: any) => 
@@ -209,7 +198,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   };
 
   const handleFileUpload = (files: any[]) => {
-    // Accumulate all uploaded files, not just replace with the latest batch
     setFile((prev: any) => {
       const currentFiles = prev || [];
       const newAllFiles = [...currentFiles, ...files];
@@ -217,9 +205,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
       return newAllFiles;
     });
   
-    // Replace the loading files with the actual uploaded files
     setUploadedFiles(prev => {
-      // Remove all loading files and add the actual uploaded files
       const nonLoadingFiles = prev.filter(f => !f.isUploading);
       console.log("Replacing loading files with uploaded files:", { nonLoadingFiles, files });
       return [...nonLoadingFiles, ...files];
@@ -229,7 +215,6 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
 
   const handleSubmitWithCleanup = () => {
     handleSubmit();
-    // Clear both file states immediately after sending to prevent them from being included in subsequent messages
     setFile(null);
     setUploadedFiles([]);
   };
@@ -249,8 +234,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const handleCloseError = () => {
     setApiError(null);
   };
-
-  // Get the appropriate messages to display
+  
   const displayMessages = (messages || storedMessages?.map(message => ({
     id: message.messageId,
     role: message.role as 'user' | 'assistant' | 'system',
