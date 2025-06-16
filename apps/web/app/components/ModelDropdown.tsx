@@ -11,9 +11,15 @@ interface ModelDropdownProps {
 
 const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const theme = useAppSelector((state) => state.theme.theme);
   const { hasOpenRouterKey, hasOpenAIKey, hasGeminiKey } = useApiKeys();
+
+  // Track when component has hydrated
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const allModels = [
     { id: "openai/gpt-4.1-mini", name: "GPT-4.1", logo: "/openai.jpg", company: "OpenAI", requiresKey: "openrouter" },
@@ -50,16 +56,16 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
 
   const selectedModelData = allModels.find(m => m.id === selectedModel);
 
-  // If selected model is not available anymore, switch to a free model
+  // If selected model is not available anymore, switch to a free model (only after hydration)
   useEffect(() => {
-    if (selectedModelData && !isModelAvailable(selectedModelData)) {
+    if (isHydrated && selectedModelData && !isModelAvailable(selectedModelData)) {
       // Default to first free model (DeepSeek or Llama)
       const freeModel = availableModels.find(m => !m.requiresKey) || availableModels[0];
       if (freeModel) {
         onModelChange(freeModel.id);
       }
     }
-  }, [selectedModelData, availableModels, onModelChange, hasOpenRouterKey, hasOpenAIKey, hasGeminiKey]);
+  }, [isHydrated, selectedModelData, availableModels, onModelChange, hasOpenRouterKey, hasOpenAIKey, hasGeminiKey]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -117,7 +123,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
       }`}>
         <div className={`backdrop-blur-xl rounded-xl shadow-xl border-2 overflow-hidden ${
           theme === 'dark' 
-            ? 'bg-gradient-to-br from-slate-900/95 via-slate-900/95 to-slate-900/90 border-orange-500/20 shadow-slate-500/20' 
+            ? 'bg-base' 
             : 'bg-gradient-to-br from-white/95 via-slate-100/95 to-orange-100/95 border-orange-400/30 shadow-orange-500/10'
         }`}>
           {/* Header */}

@@ -2,12 +2,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu } from "lucide-react";
-import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetChatState, setSelectedModel, setIsTheoMode } from '../store/chatSlice';
 import { useApiKeys } from '../hooks/useApiKeys';
+import { useConvexChat } from '../hooks/useConvexChat';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
@@ -28,7 +28,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const [isInitialized, setIsInitialized] = useState(false);
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { question, selectedModel, isCreativeMode, isTheoMode, attachedFiles } = useAppSelector((state) => state.chat);
+  const { question, selectedModel, isCreativeMode, isTheoMode } = useAppSelector((state) => state.chat);
   const theme = useAppSelector((state) => state.theme.theme);
   const { apiKeys } = useApiKeys();
   const threadId = pathname.split('/')[2];
@@ -44,9 +44,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
     threadId: threadId!,
   });
   
-  const storedMessages = useQuery(api.messages.listMessages, {
-    threadId: threadId!,
-  });
+
 
   const threadDetails = useQuery(api.threads.getThreadDetails, {
     userId: user?.id || "",
@@ -57,126 +55,59 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
     messages,
     input,
     handleInputChange,
-    handleSubmit,
-    append,
-    setMessages,
+    handleSubmit: submitMessage,
     status,
-  } = useChat({
-    api: "/api/chat",
-    id: threadId,
-    body: {
-      model: selectedModel,
-      userId: user?.id,
-      threadId,
-      attachments: file ? file : null,
-      apiKeys: apiKeys,
-      isTheoMode: isTheoMode,
-      modelParams: {
-        temperature: finalIsCreativeMode ? 0.8 : 0.3,
-        topK: finalIsCreativeMode ? 50 : 10,
-      },
-    },
-    onError: async (error) => {
-      console.error('Chat error:', error);
-      
-      try {
-        // If error has a response property, it might be a fetch error
-        if ((error as any).response) {
-          const response = (error as any).response;
-          if (response.status === 400 || response.status === 401) {
-            try {
-              const errorData = await response.json();
-              if (errorData.error === "API_KEY_REQUIRED" || errorData.error === "INVALID_API_KEY") {
-                setApiError(errorData.message || "Invalid or missing API key. Please check your API key configuration in settings.");
-                return;
-              }
-            } catch (jsonError) {
-              // If we can't parse JSON, fall through to generic handling
-            }
-          }
-        }
-        
-        // Check error message for API key related issues
-        const errorMessage = error.message || String(error);
-        if (errorMessage.includes('400') || 
-            errorMessage.includes('401') || 
-            errorMessage.includes('unauthorized') ||
-            errorMessage.toLowerCase().includes('api key') ||
-            errorMessage.toLowerCase().includes('authentication')) {
-          setApiError("Invalid or missing API key. Please check your API key configuration in settings.");
-        } else {
-          setApiError("An error occurred while processing your request. Please try again.");
-        }
-      } catch (parseError) {
-        setApiError("An unexpected error occurred. Please try again.");
-      }
-    }
-  })
-
-  const [hasHydratedHistory, setHasHydratedHistory] = useState(false);
+    error: convexError,
+    clearError,
+  } = useConvexChat(threadId!, user?.id || '', question || '')
 
   useEffect(() => {
-    if (storedMessages) {
-      console.log('Stored messages:', storedMessages);
-      console.log(threadId)
-      console.log('User ID:', user?.id);
-      const ordered = [...storedMessages].sort(
-        (a, b) => a.createdAt - b.createdAt
+    if (!isInitialized && question) {
+      // Check for pending files from homepage
+      const pendingFiles = sessionStorage.getItem('pendingFiles');
+      if (pendingFiles) {
+        try {
+          const files = JSON.parse(pendingFiles);
+          // Only set files for API, NOT for preview since they'll be sent immediately
+          setFile(files);
+          // Ensure uploadedFiles stays empty so no preview shows
+          setUploadedFiles([]);
+          // Clear the session storage
+          sessionStorage.removeItem('pendingFiles');
+        } catch (error) {
+          console.error('Error parsing pending files:', error);
+        }
+      }
+
+      // Submit the initial question
+      submitMessage(
+        selectedModel,
+        file,
+        apiKeys,
+        isTheoMode,
+        {
+          temperature: finalIsCreativeMode ? 0.8 : 0.3,
+          topK: finalIsCreativeMode ? 50 : 10,
+        }
       );
 
-      const history = ordered.map((m) => ({
-        id: m.messageId,
-        role: m.role as 'user' | 'assistant' | 'system',
-        content: m.content,
-        createdAt: new Date(m.createdAt),
-        reasoning: (m as any).modelResponse || undefined,
-      }));
+      // Clear file state after initial message to prevent files from being sent with subsequent messages
+      setTimeout(() => {
+        setFile(null);
+      }, 100);
 
-      setMessages(history);
-      setHasHydratedHistory(true);
-    }
-  }, [hasHydratedHistory, storedMessages, setMessages]);
-
-  useEffect(() => {
-    console.log('ChatArea useEffect running:', { isInitialized, question });
-    if (!isInitialized) {
-      if (question) {
-        // Check for pending files from homepage
-        const pendingFiles = sessionStorage.getItem('pendingFiles');
-        if (pendingFiles) {
-          try {
-            const files = JSON.parse(pendingFiles);
-            // Only set files for API, NOT for preview since they'll be sent immediately
-            setFile(files);
-            // Ensure uploadedFiles stays empty so no preview shows
-            setUploadedFiles([]);
-            // Clear the session storage
-            sessionStorage.removeItem('pendingFiles');
-          } catch (error) {
-            console.error('Error parsing pending files:', error);
-          }
-        }
-
-        append({ role: 'user', content: question })
-
-        // Clear file state after initial message to prevent files from being sent with subsequent messages
-        setTimeout(() => {
-          setFile(null);
-        }, 100);
-
-        const setThreadTitle = async () => {
-          await axios.post("/api/thread/title", {
-            threadId,
-            userId: user?.id,
-            question
-          })
-        }
-        setThreadTitle();
-        setIsInitialized(true);
-        dispatch(resetChatState());
+      const setThreadTitle = async () => {
+        await axios.post("/api/thread/title", {
+          threadId,
+          userId: user?.id,
+          question
+        })
       }
+      setThreadTitle();
+      setIsInitialized(true);
+      dispatch(resetChatState());
     }
-  }, [isInitialized, question]);
+  }, [isInitialized, question, submitMessage, selectedModel, file, apiKeys, isTheoMode, finalIsCreativeMode, threadId, user?.id, dispatch]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -207,9 +138,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   };
 
   const handleFileUploadStart = (files: any[]) => {
-    // Add loading files to preview immediately
     setUploadedFiles(prev => [...prev, ...files]);
-    console.log("Upload start, loading files:", files);
   };
 
   const handleFileUpload = (files: any[]) => {
@@ -232,7 +161,16 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   };
 
   const handleSubmitWithCleanup = () => {
-    handleSubmit();
+    submitMessage(
+      selectedModel,
+      file,
+      apiKeys,
+      isTheoMode,
+      {
+        temperature: finalIsCreativeMode ? 0.8 : 0.3,
+        topK: finalIsCreativeMode ? 50 : 10,
+      }
+    );
     // Clear both file states immediately after sending to prevent them from being included in subsequent messages
     setFile(null);
     setUploadedFiles([]);
@@ -252,16 +190,11 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
 
   const handleCloseError = () => {
     setApiError(null);
+    clearError();
   };
 
-  // Get the appropriate messages to display
-  const displayMessages = (messages || storedMessages?.map(message => ({
-    id: message.messageId,
-    role: message.role as 'user' | 'assistant' | 'system',
-    content: message.content,
-    messageId: message.messageId,
-    createdAt: new Date(message.createdAt),
-  })) || []).filter(msg => msg.role !== 'data');
+  // Use the real-time messages from our custom hook
+  const displayMessages = messages;
 
   return (
     <div className="relative">
@@ -320,7 +253,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
       
       {/* Error Notification */}
       <ErrorNotification 
-        error={apiError}
+        error={apiError || convexError}
         onClose={handleCloseError}
       />
     </div>

@@ -344,7 +344,7 @@ export async function POST(request: NextRequest) {
       // async onChunk({chunk}) {
       //   await convex.mutation(api.messages.patchMessage, {
       //     messageId: assistantMessageId,
-      //     content: chunk.textDelta,
+      //     content: chunk.type === "text-delta" ? chunk.textDelta : chunk.text,
       //     status: "completed",
       //   });
       // },
