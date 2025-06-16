@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as attachments from "../attachments.js";
+import type * as chat from "../chat.js";
 import type * as http from "../http.js";
 import type * as messages from "../messages.js";
 import type * as sharedChats from "../sharedChats.js";
@@ -30,6 +31,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   attachments: typeof attachments;
+  chat: typeof chat;
   http: typeof http;
   messages: typeof messages;
   sharedChats: typeof sharedChats;

@@ -4,11 +4,40 @@ import { streamText, experimental_generateImage as generateImage } from "ai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 import { createGroq } from "@ai-sdk/groq";
-import { openai, createOpenAI } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import {  GoogleGenAI, Modality } from "@google/genai";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { LEXY_SYSTEM_PROMPT, THEO_MODE_SYSTEM_PROMPT } from "~/app/lib/prompts/system-prompts";
 
+// -----------------------------------------------------------------------------
+// Provider caches – instantiated once per edge worker to avoid per-request
+// construction overhead.
+// -----------------------------------------------------------------------------
+const openAIProviders = new Map<string, ReturnType<typeof createOpenAI>>();
+function getOpenAIProvider(apiKey: string) {
+  let provider = openAIProviders.get(apiKey);
+  if (!provider) {
+    provider = createOpenAI({ apiKey });
+    openAIProviders.set(apiKey, provider);
+  }
+  return provider;
+}
+
+const openRouterProviders = new Map<string, ReturnType<typeof createOpenRouter>>();
+function getOpenRouterProvider(apiKey: string) {
+  let provider = openRouterProviders.get(apiKey);
+  if (!provider) {
+    provider = createOpenRouter({ apiKey });
+    openRouterProviders.set(apiKey, provider);
+  }
+  return provider;
+}
+
+const groqProviderSingleton = process.env.GROQ_API_KEY
+  ? createGroq({ apiKey: process.env.GROQ_API_KEY })
+  : null;
+
+// Edge runtime hint for Next.js
 export const runtime = "edge";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -65,55 +94,47 @@ export async function POST(request: NextRequest) {
     if (!messages || messages.length === 0) {
       return new Response("messages are required", { status: 400 });
     }
-
-    await convex.mutation(api.threads.ensureThread, {
-    userId,
-    threadId,
-    model,
-    title: "New Chat",
-    });
     
+    // ------------------------------------------------------------------
+    // Batched Convex mutation – creates / ensures the thread, inserts both
+    // messages, and writes any attachments in a single network round-trip.
+    // ------------------------------------------------------------------
     const userMessageId = crypto.randomUUID();
-    const last = messages[messages.length - 1]!
-    await convex.mutation(api.messages.addMessage, {
-      userId,
-      threadId,
-      role: "user",
-      content: last.content as string,
-      model,
-      status: "completed",
-      modelParams,
-      messageId: userMessageId,
-    })
-
     const assistantMessageId = crypto.randomUUID();
-    await convex.mutation(api.messages.addMessage, {
+
+    const last = messages[messages.length - 1]!;
+
+    const attachmentArray = attachments
+      ? Array.isArray(attachments)
+        ? attachments
+        : [attachments]
+      : [];
+
+    const attachmentsForDb = attachmentArray.map((att: any) => ({
+      attachmentId: crypto.randomUUID(),
+      attachmentUrl: att.url,
+      fileName: att.name,
+      fileType: att.type,
+      fileSize: att.size,
+      fileKey: att.key,
+    }));
+
+    await convex.mutation(api.chat.createChatBatch, {
       userId,
       threadId,
-      role: "assistant",
-      content: "",
+      title: "New Chat",
       model,
-      status: "thinking",
-      modelParams,
-      messageId: assistantMessageId,
-    })
-    
-    if (attachments) {
-      const attachmentArray = Array.isArray(attachments) ? attachments : [attachments];
-      
-      for (const attachment of attachmentArray) {
-        await convex.mutation(api.attachments.addAttachment, {
-          userId,
-          messageId: userMessageId, 
-          attachmentUrl: attachment.url,
-          fileName: attachment.name,
-          fileType: attachment.type,
-          fileSize: attachment.size,
-          fileKey: attachment.key,
-          attachmentId: crypto.randomUUID(),
-        });
-      }
-    }
+      userMessage: {
+        messageId: userMessageId,
+        content: last.content as string,
+        modelParams,
+      },
+      assistantMessage: {
+        messageId: assistantMessageId,
+        modelParams,
+      },
+      attachments: attachmentsForDb,
+    });
 
     if (model ==="gemini-2.0-flash-preview-image-generation") {
       if (!apiKeys?.gemini) {
@@ -199,7 +220,7 @@ export async function POST(request: NextRequest) {
       }
       
       try {
-        const openaiProvider = createOpenAI({ apiKey: apiKeys.openai });
+        const openaiProvider = getOpenAIProvider(apiKeys.openai);
         const { image } = await generateImage({
           model: openaiProvider.image('gpt-image-1'),
           prompt: messages[messages.length - 1].content,
@@ -252,11 +273,10 @@ export async function POST(request: NextRequest) {
 
     let aiProvider;
     if (groqModels.includes(model)) {
-      if (!process.env.GROQ_API_KEY) {
+      if (!groqProviderSingleton) {
         return new Response("Groq API key not configured on server.", { status: 500 });
       }
-      const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-      aiProvider = groq(model);
+      aiProvider = groqProviderSingleton(model);
     } else if (model === "gpt-image-1") {
       if (!apiKeys?.openai) {
         return new Response(JSON.stringify({ 
@@ -267,7 +287,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      const openaiProvider = createOpenAI({ apiKey: apiKeys.openai });
+      const openaiProvider = getOpenAIProvider(apiKeys.openai);
       aiProvider = openaiProvider(model);
     } else if (model === "gemini-2.0-flash-preview-image-generation") {
       if (!apiKeys?.gemini) {
@@ -294,7 +314,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      const openrouter = createOpenRouter({ apiKey: openrouterApiKey });
+      const openrouter = getOpenRouterProvider(openrouterApiKey);
       aiProvider = openrouter(model);
     }
 
