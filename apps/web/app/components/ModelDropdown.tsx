@@ -43,7 +43,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center gap-2.5 rounded-xl px-3 py-3 text-base font-medium tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 ${
+        className={`group flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-base font-medium tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 ${
           theme === 'dark' 
             ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/50 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/60 hover:to-slate-700/95 text-slate-200 border border-slate-500/50 hover:border-slate-400/70 shadow-md hover:shadow-slate-500/25' 
             : 'bg-gradient-to-r from-slate-200/95 via-slate-300/60 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/70 hover:to-slate-300/95 text-slate-700 border border-slate-400/60 hover:border-slate-500/80 shadow-md hover:shadow-slate-500/25'

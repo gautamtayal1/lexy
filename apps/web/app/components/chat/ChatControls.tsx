@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from 'react';
-import { ArrowBigUp, Sparkles, Paperclip } from 'lucide-react';
+import { Sparkles, Paperclip, ArrowUp } from 'lucide-react';
 import ModelDropdown from '../ModelDropdown';
 import { useAppSelector } from '../../store/hooks';
 
@@ -133,7 +133,7 @@ export default function ChatControls({
         
         {/* Theo Mode Button */}
         <button
-          className={`group relative overflow-hidden rounded-xl px-3 py-2.5 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2 text-sm ${
+          className={`group relative overflow-hidden rounded-2xl px-3 py-2 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2 text-sm ${
             isTheoMode
               ? theme === 'dark'
                 ? 'bg-gradient-to-r from-slate-700/90 via-slate-600/40 to-blue-800/50 text-white border border-slate-400/60 shadow-md shadow-slate-500/30'
@@ -155,7 +155,7 @@ export default function ChatControls({
         
         {/* Creative Mode Button */}
         <button
-          className={`group relative overflow-hidden rounded-xl px-3 py-3 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2 text-sm ${
+          className={`group relative overflow-hidden rounded-2xl px-3 py-2.5 font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 flex items-center gap-2 text-sm ${
             isCreativeMode
               ? theme === 'dark'
                 ? 'bg-gradient-to-r from-purple-600/90 via-pink-700/80 to-purple-700/90 text-white border-2 border-purple-400/80 shadow-lg shadow-purple-500/40'
@@ -179,7 +179,7 @@ export default function ChatControls({
       <div className="flex items-center gap-3">
         <ModelDropdown selectedModel={selectedModel} onModelChange={onModelChange} />
         <button  
-          className={`group relative overflow-hidden transition-all duration-300 ease-out px-4 py-3 rounded-xl hover:scale-105 active:scale-95 ${
+          className={`group relative overflow-hidden transition-all duration-300 ease-out px-3 py-3 rounded-3xl hover:scale-105 active:scale-95 ${
             theme === 'dark' 
               ? 'bg-gradient-to-r from-slate-800/90 via-slate-700/50 to-slate-800/90 hover:from-slate-700/95 hover:via-slate-600/60 hover:to-emerald-800/40 text-slate-200 border border-slate-500/50 hover:border-slate-400/70 shadow-md hover:shadow-slate-500/25' 
               : 'bg-gradient-to-r from-slate-200/95 via-slate-300/60 to-slate-200/95 hover:from-slate-300/95 hover:via-slate-400/70 hover:to-emerald-200/40 text-slate-700 border border-slate-400/60 hover:border-slate-500/80 shadow-md hover:shadow-slate-500/25'
@@ -191,7 +191,7 @@ export default function ChatControls({
               ? 'bg-gradient-to-r from-slate-600/15 to-emerald-600/15' 
               : 'bg-gradient-to-r from-slate-400/10 to-emerald-400/10'
           }`}></div>
-          <ArrowBigUp className="h-5 w-5 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5" />
+          <ArrowUp className="h-4 w-4 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5" />
         </button>
       </div>
     </div>
