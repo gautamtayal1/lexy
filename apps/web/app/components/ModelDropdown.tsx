@@ -47,19 +47,23 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
     }
   };
 
-  const availableModels = allModels.filter(isModelAvailable);
-  const unavailableModels = allModels.filter(model => !isModelAvailable(model));
+  // Only filter models after hydration to prevent SSR/client mismatch
+  const availableModels = isHydrated ? allModels.filter(isModelAvailable) : allModels.filter(m => !m.requiresKey);
+  const unavailableModels = isHydrated ? allModels.filter(model => !isModelAvailable(model)) : allModels.filter(m => m.requiresKey);
 
   const selectedModelData = allModels.find(m => m.id === selectedModel);
+  
+  // During SSR, show a consistent default to prevent hydration mismatch
+  const displaySelectedModel = isHydrated ? selectedModelData : allModels.find(m => m.id === "llama-3.3-70b-versatile");
 
   useEffect(() => {
     if (isHydrated && selectedModelData && !isModelAvailable(selectedModelData)) {
-      const freeModel = availableModels.find(m => !m.requiresKey) || availableModels[0];
+      const freeModel = allModels.find(m => !m.requiresKey) || allModels.filter(isModelAvailable)[0];
       if (freeModel) {
         onModelChange(freeModel.id);
       }
     }
-  }, [isHydrated, selectedModelData, availableModels, onModelChange, hasOpenRouterKey, hasOpenAIKey, hasGeminiKey]);
+  }, [isHydrated, selectedModelData, onModelChange, hasOpenRouterKey, hasOpenAIKey, hasGeminiKey]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,10 +87,10 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
         } ${isOpen ? 'scale-105' : ''}`}
       >
         <div className="relative">
-          {selectedModelData?.logo && (
+          {displaySelectedModel?.logo && (
             <Image
-              src={selectedModelData.logo}
-              alt={selectedModelData.name}
+              src={displaySelectedModel.logo}
+              alt={displaySelectedModel.name}
               width={20}
               height={20}
               className="rounded-md transition-transform duration-300 group-hover:rotate-3"
@@ -94,7 +98,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({ selectedModel, onModelCha
           )}
         </div>
         <span className="transition-colors duration-300">
-          {selectedModelData?.name || 'Select Model'}
+          {displaySelectedModel?.name || 'Select Model'}
         </span>
         <ChevronDown className={`h-4 w-4 transition-all duration-500 ease-out ${
           isOpen ? 'rotate-180' : 'rotate-0'

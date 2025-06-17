@@ -64,7 +64,6 @@ export default defineSchema({
         )
       })
     ),
-    modelResponse: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

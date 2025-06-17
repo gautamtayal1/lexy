@@ -29,14 +29,20 @@ export function useApiKeys() {
   }, []);
 
   const hasOpenRouterKey = useCallback((): boolean => {
+    // Return false during SSR to prevent hydration mismatch
+    if (typeof window === 'undefined') return false;
     return apiKeyUtils.hasApiKey('openrouter');
   }, []);
 
   const hasOpenAIKey = useCallback((): boolean => {
+    // Return false during SSR to prevent hydration mismatch
+    if (typeof window === 'undefined') return false;
     return apiKeyUtils.hasApiKey('openai');
   }, []);
 
   const hasGeminiKey = useCallback((): boolean => {
+    // Return false during SSR to prevent hydration mismatch
+    if (typeof window === 'undefined') return false;
     return apiKeyUtils.hasApiKey('gemini');
   }, []);
 

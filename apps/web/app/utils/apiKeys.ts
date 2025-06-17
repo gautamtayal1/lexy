@@ -32,6 +32,9 @@ export const apiKeyUtils = {
   },
 
   loadApiKeys: (): ApiKeyConfig => {
+    // Return empty config during SSR to prevent hydration mismatch
+    if (typeof window === 'undefined') return {};
+    
     try {
       const stored = localStorage.getItem(API_KEYS_STORAGE_KEY);
       if (!stored) return {};
@@ -65,11 +68,15 @@ export const apiKeyUtils = {
   },
 
   hasApiKey: (provider: keyof ApiKeyConfig): boolean => {
+    // Return false during SSR to prevent hydration mismatch
+    if (typeof window === 'undefined') return false;
     const keys = apiKeyUtils.loadApiKeys();
     return !!(keys[provider] && keys[provider]!.trim());
   },
 
   getApiKey: (provider: keyof ApiKeyConfig): string | undefined => {
+    // Return undefined during SSR to prevent hydration mismatch
+    if (typeof window === 'undefined') return undefined;
     const keys = apiKeyUtils.loadApiKeys();
     return keys[provider];
   },

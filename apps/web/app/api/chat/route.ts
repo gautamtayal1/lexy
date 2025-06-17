@@ -5,14 +5,10 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@repo/db/convex/_generated/api";
 import { createGroq } from "@ai-sdk/groq";
 import { createOpenAI } from "@ai-sdk/openai";
-import {  GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { LEXY_SYSTEM_PROMPT, THEO_MODE_SYSTEM_PROMPT } from "~/app/lib/prompts/system-prompts";
 
-// -----------------------------------------------------------------------------
-// Provider caches – instantiated once per edge worker to avoid per-request
-// construction overhead.
-// -----------------------------------------------------------------------------
 const openAIProviders = new Map<string, ReturnType<typeof createOpenAI>>();
 function getOpenAIProvider(apiKey: string) {
   let provider = openAIProviders.get(apiKey);
@@ -37,24 +33,12 @@ const groqProviderSingleton = process.env.GROQ_API_KEY
   ? createGroq({ apiKey: process.env.GROQ_API_KEY })
   : null;
 
-// Edge runtime hint for Next.js
-export const runtime = "edge";
-
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+export const runtime = "edge";
 
 const groqModels = [
   "llama-3.3-70b-versatile",
 ]
-
-const openrouterModels = [
-  "openai/gpt-4.1-mini",
-  "openai/o4-mini",
-  "anthropic/claude-3-5-sonnet-20240620",
-  "google/gemini-2.0-flash-exp:free",
-  "google/gemini-2.5-pro-preview",
-]
-
-const apiKey = process.env.VERTEX_API_KEY;
 
 const s3Client = new S3Client({
   endpoint: `https://${process.env.DO_SPACES_REGION}.digitaloceanspaces.com`,
@@ -94,11 +78,7 @@ export async function POST(request: NextRequest) {
     if (!messages || messages.length === 0) {
       return new Response("messages are required", { status: 400 });
     }
-    
-    // ------------------------------------------------------------------
-    // Batched Convex mutation – creates / ensures the thread, inserts both
-    // messages, and writes any attachments in a single network round-trip.
-    // ------------------------------------------------------------------
+
     const userMessageId = crypto.randomUUID();
     const assistantMessageId = crypto.randomUUID();
 
@@ -229,7 +209,6 @@ export async function POST(request: NextRequest) {
         if (imageData) {
           const buffer = Buffer.from(imageData, "base64");
           const fileName = `generated-images/${crypto.randomUUID()}.png`;
-          
           try {
             const result = await s3Client.send(new PutObjectCommand({
               Bucket: process.env.DO_SPACES_BUCKET!,
@@ -325,7 +304,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    let response = ""
     const result = await streamText({
       model: aiProvider,
       system: isTheoMode ? THEO_MODE_SYSTEM_PROMPT : LEXY_SYSTEM_PROMPT,
@@ -350,21 +328,15 @@ export async function POST(request: NextRequest) {
         : messages,
       topK: modelParams.topK,
       temperature: modelParams.temperature,
-      async onChunk({chunk}) {
-        if(chunk.type === "text-delta") {
-        response += chunk.textDelta
+      onFinish: async ({text}) => {
+        await convex.mutation(api.messages.patchMessage, {
+          messageId: assistantMessageId,
+          content: text,
+          status: "completed",
+        });
       }
     }
-    })
-
-    setInterval(async() => {
-      await convex.mutation(api.messages.patchMessage, {
-        messageId: assistantMessageId,
-        content: response,
-        status: "completed",
-      });
-    }, 1000);
-    
+    );
     return result.toDataStreamResponse({
       sendReasoning: true,
       sendSources: true,
