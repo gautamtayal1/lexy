@@ -83,10 +83,10 @@ export default function ShareModal({ threadId, threadTitle, onClose }: ShareModa
         onClick={(e) => e.stopPropagation()}
       >
         <div 
-          className="bg-[#171824] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl"
+          className="bg-base border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl"
           style={{
             background: theme === 'dark' 
-              ? 'linear-gradient(135deg, #171824 0%, #1a1b2e 100%)' 
+              ? 'linear-gradient(135deg, var(--color-base) 0%, #1a1b2e 100%)' 
               : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
             boxShadow: theme === 'dark'
               ? '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)'
@@ -99,8 +99,8 @@ export default function ShareModal({ threadId, threadTitle, onClose }: ShareModa
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl ${
                   theme === 'dark' 
-                    ? 'bg-blue-500/20 text-blue-400' 
-                    : 'bg-blue-500/10 text-blue-600'
+                    ? 'bg-button ' 
+                    : 'bg-blue-500/20 text-blue-400'
                 }`}>
                   <Share2 className="h-5 w-5" />
                 </div>
@@ -170,7 +170,7 @@ export default function ShareModal({ threadId, threadTitle, onClose }: ShareModa
                       : 'transform hover:scale-[1.02] active:scale-[0.98]'
                   } ${
                     theme === 'dark'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/25'
+                      ? 'bg-button'
                       : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/25'
                   }`}
                 >

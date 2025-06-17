@@ -1,4 +1,4 @@
-export type SettingsTab = 'customization' | 'history' | 'models' | 'api-keys' | 'attachments';
+export type SettingsTab = 'api-keys' | 'history' | 'attachments';
 
 export interface SettingsTabPanelProps {
   activeTab: SettingsTab;

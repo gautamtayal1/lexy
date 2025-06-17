@@ -37,3 +37,37 @@ export const getAttachmentsByMessageId = query({
       .collect();
   },
 });
+
+export const getAttachmentsByUserId = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("attachments")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const deleteAttachment = mutation({
+  args: {
+    userId: v.string(),
+    attachmentId: v.string(),
+  },
+  handler: async (ctx, { userId, attachmentId }) => {
+    const attachment = await ctx.db
+      .query("attachments")
+      .withIndex("byUserId", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("attachmentId"), attachmentId))
+      .unique();
+
+    if (!attachment) {
+      throw new Error("Attachment not found or you don't have permission to delete it");
+    }
+
+    await ctx.db.delete(attachment._id);
+    return true;
+  },
+});

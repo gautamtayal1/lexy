@@ -5,98 +5,164 @@ import { useUser } from '@clerk/nextjs';
 import { useQuery } from 'convex/react';
 import { api } from '@repo/db/convex/_generated/api';
 import { User, Mail, Calendar, Shield } from 'lucide-react';
+import { useAppSelector } from '../../store/hooks';
 
 export default function UserProfilePanel() {
   const { user } = useUser();
+  const theme = useAppSelector((state) => state.theme.theme);
   const convexUser = useQuery(api.users.current);
 
   if (!user) {
     return (
-      <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 h-full flex items-center justify-center">
+      <div className={`backdrop-blur-xl rounded-2xl border p-6 h-full flex items-center justify-center ${
+        theme === 'dark' 
+          ? 'bg-white/5 border-white/10' 
+          : 'bg-black/5 border-black/20'
+      }`}>
         <div className="animate-pulse text-center">
-          <div className="w-24 h-24 bg-white/20 rounded-full mx-auto mb-4"></div>
-          <div className="h-4 bg-white/20 rounded mb-2"></div>
-          <div className="h-3 bg-white/20 rounded mb-1"></div>
+          <div className={`w-24 h-24 rounded-full mx-auto mb-4 ${
+            theme === 'dark' ? 'bg-white/20' : 'bg-black/20'
+          }`}></div>
+          <div className={`h-4 rounded mb-2 ${
+            theme === 'dark' ? 'bg-white/20' : 'bg-black/20'
+          }`}></div>
+          <div className={`h-3 rounded mb-1 ${
+            theme === 'dark' ? 'bg-white/20' : 'bg-black/20'
+          }`}></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 h-full flex flex-col">
-      {/* Profile Picture */}
-      <div className="text-center mb-6">
+    <div className={`backdrop-blur-xl rounded-2xl border p-8 h-full flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-white/5 border-white/10' 
+        : 'bg-black/5 border-black/20'
+    }`}>
+      {/* Profile Picture - Much larger and more prominent */}
+      <div className="text-center mb-10">
         {user.imageUrl ? (
           <img 
             src={user.imageUrl} 
             alt="Profile" 
-            className="w-24 h-24 rounded-full mx-auto border-2 border-white/30 shadow-lg"
+            className={`w-32 h-32 rounded-full mx-auto border-4 shadow-2xl ${
+              theme === 'dark' ? 'border-white/20' : 'border-black/20'
+            }`}
           />
         ) : (
-          <div className="w-24 h-24 bg-white/20 rounded-full mx-auto flex items-center justify-center border-2 border-white/30">
-            <User className="w-12 h-12 text-white" />
+          <div className={`w-32 h-32 rounded-full mx-auto flex items-center justify-center border-4 shadow-2xl ${
+            theme === 'dark' 
+              ? 'bg-gradient-to-br from-white/20 to-white/10 border-white/20' 
+              : 'bg-gradient-to-br from-black/15 to-black/8 border-black/20'
+          }`}>
+            <User className={`w-16 h-16 ${
+              theme === 'dark' ? 'text-white' : 'text-black'
+            }`} />
           </div>
         )}
       </div>
 
-      {/* User Name */}
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">
+      {/* User Name - Enhanced typography */}
+      <div className="text-center mb-12">
+        <h2 className={`text-3xl font-bold mb-3 ${
+          theme === 'dark' ? 'text-white' : 'text-black'
+        }`}>
           {user.firstName} {user.lastName}
         </h2>
-        <p className="text-white/70 text-sm">
+        <p className={`text-lg ${
+          theme === 'dark' ? 'text-white/60' : 'text-black/60'
+        }`}>
           @{user.username || user.firstName?.toLowerCase()}
         </p>
       </div>
 
-      {/* User Details */}
-      <div className="space-y-6 flex-1">
-        <div className="flex items-center gap-3 text-white/80">
-          <Mail className="w-5 h-5 text-blue-400" />
-          <div>
-            <p className="text-xs text-white/50 uppercase tracking-wide">Email</p>
-            <p className="text-sm font-medium">{user.primaryEmailAddress?.emailAddress}</p>
+      {/* User Details - Redesigned with better spacing and styling */}
+      <div className="space-y-8 flex-1">
+        <div className={`p-6 rounded-xl ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20' 
+            : 'bg-gradient-to-r from-black/8 to-black/4 border border-black/20'
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-full ${
+              theme === 'dark' ? 'bg-blue-500/20' : 'bg-blue-500/20'
+            }`}>
+              <Mail className={`w-6 h-6 ${
+                theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <p className={`text-sm font-medium mb-1 ${
+                theme === 'dark' ? 'text-white/70' : 'text-black/70'
+              }`}>Email Address</p>
+              <p className={`text-base font-semibold ${
+                theme === 'dark' ? 'text-white' : 'text-black'
+              }`}>
+                {user.primaryEmailAddress?.emailAddress}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-white/80">
-          <Calendar className="w-5 h-5 text-green-400" />
-          <div>
-            <p className="text-xs text-white/50 uppercase tracking-wide">Member since</p>
-            <p className="text-sm font-medium">
-              {new Date(user.createdAt || Date.now()).toLocaleDateString()}
-            </p>
+        <div className={`p-6 rounded-xl ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20' 
+            : 'bg-gradient-to-r from-black/8 to-black/4 border border-black/20'
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-full ${
+              theme === 'dark' ? 'bg-green-500/20' : 'bg-green-500/20'
+            }`}>
+              <Calendar className={`w-6 h-6 ${
+                theme === 'dark' ? 'text-green-400' : 'text-green-600'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <p className={`text-sm font-medium mb-1 ${
+                theme === 'dark' ? 'text-white/70' : 'text-black/70'
+              }`}>Member Since</p>
+              <p className={`text-base font-semibold ${
+                theme === 'dark' ? 'text-white' : 'text-black'
+              }`}>
+                {new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-white/80">
-          <Shield className="w-5 h-5 text-purple-400" />
-          <div>
-            <p className="text-xs text-white/50 uppercase tracking-wide">Account Status</p>
-            <p className="text-sm font-medium">
-              <span className="inline-flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                Active
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="mt-8 pt-6 border-t border-white/20">
-        <div className="grid grid-cols-2 gap-4 text-center">
-          <div className="bg-white/5 rounded-xl p-4">
-            <p className="text-2xl font-bold text-white mb-1">
-              {convexUser ? '12' : '0'}
-            </p>
-            <p className="text-xs text-white/50 uppercase tracking-wide">Conversations</p>
-          </div>
-          <div className="bg-white/5 rounded-xl p-4">
-            <p className="text-2xl font-bold text-white mb-1">
-              {convexUser ? '48' : '0'}
-            </p>
-            <p className="text-xs text-white/50 uppercase tracking-wide">Messages</p>
+        <div className={`p-6 rounded-xl ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20' 
+            : 'bg-gradient-to-r from-black/8 to-black/4 border border-black/20'
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-full ${
+              theme === 'dark' ? 'bg-purple-500/20' : 'bg-purple-500/20'
+            }`}>
+              <Shield className={`w-6 h-6 ${
+                theme === 'dark' ? 'text-purple-400' : 'text-purple-600'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <p className={`text-sm font-medium mb-1 ${
+                theme === 'dark' ? 'text-white/70' : 'text-black/70'
+              }`}>Account Status</p>
+              <div className="flex items-center gap-3">
+                <span className={`w-3 h-3 rounded-full ${
+                  theme === 'dark' ? 'bg-green-400' : 'bg-green-500'
+                }`}></span>
+                <p className={`text-base font-semibold ${
+                  theme === 'dark' ? 'text-white' : 'text-black'
+                }`}>
+                  Premium Active
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
