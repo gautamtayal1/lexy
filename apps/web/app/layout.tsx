@@ -20,15 +20,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <div className="relative w-screen h-screen">
+      <body className="overflow-x-hidden">
+        <div className="relative w-screen min-h-screen">
           <ReduxProvider>
             <ThemeBackground />
             <ClerkProvider
               signInUrl="/sign-in"
               signUpUrl="/sign-up"
             >
-              <ConvexClientProvider>{children}</ConvexClientProvider>
+              <ConvexClientProvider>
+                <div className="relative z-10">
+                  {children}
+                </div>
+              </ConvexClientProvider>
             </ClerkProvider>
           </ReduxProvider>
         </div>

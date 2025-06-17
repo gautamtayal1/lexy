@@ -77,13 +77,13 @@ export default function SharedChatPage() {
   }));
 
   return (
-    <div className={`h-screen backdrop-blur-xl shadow rounded-2xl border flex flex-col m-8 ${
+    <div className={`min-h-screen backdrop-blur-xl shadow rounded-2xl border flex flex-col mx-8 my-8 ${
       theme === 'dark' 
         ? 'border-white/20 bg-white/5' 
         : 'border-black/20 bg-black/5'
     }`}>
       {/* Read-only indicator */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-12 right-12 z-10">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
           theme === 'dark' 
             ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 

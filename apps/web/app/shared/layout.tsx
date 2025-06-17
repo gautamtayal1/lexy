@@ -11,12 +11,14 @@ export default function SharedLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <div className="relative w-screen h-screen">
+      <body className="overflow-x-hidden">
+        <div className="relative w-screen min-h-screen">
           <ReduxProvider>
             <ThemeBackground />
             <ConvexClientProvider>
-              {children}
+              <div className="relative z-10">
+                {children}
+              </div>
             </ConvexClientProvider>
           </ReduxProvider>
         </div>
