@@ -170,6 +170,27 @@ export async function POST(request: NextRequest) {
                 attachmentId: crypto.randomUUID(),
               });
               
+              // Complete the assistant message
+              await convex.mutation(api.messages.patchMessage, {
+                messageId: assistantMessageId,
+                content: "",
+                status: "completed",
+              });
+              
+              // Return streaming response to keep useChat happy
+              const stream = new ReadableStream({
+                start(controller) {
+                  controller.enqueue(new TextEncoder().encode(''));
+                  controller.close();
+                }
+              });
+              
+              return new Response(stream, {
+                headers: {
+                  'Content-Type': 'text/plain; charset=utf-8',
+                },
+              });
+              
             } catch (error) {
               console.error('Failed to upload image to DO Spaces:', error);
             }
@@ -234,6 +255,26 @@ export async function POST(request: NextRequest) {
               attachmentId: crypto.randomUUID(),
             });
             
+            // Complete the assistant message
+            await convex.mutation(api.messages.patchMessage, {
+              messageId: assistantMessageId,
+              content: "",
+              status: "completed",
+            });
+            
+            // Return streaming response to keep useChat happy
+            const stream = new ReadableStream({
+              start(controller) {
+                controller.enqueue(new TextEncoder().encode(''));
+                controller.close();
+              }
+            });
+            
+            return new Response(stream, {
+              headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+              },
+            });
           } catch (error) {
             console.error('Failed to upload image to DO Spaces:', error);
           }
@@ -256,32 +297,9 @@ export async function POST(request: NextRequest) {
         return new Response("Groq API key not configured on server.", { status: 500 });
       }
       aiProvider = groqProviderSingleton(model);
-    } else if (model === "gpt-image-1") {
-      if (!apiKeys?.openai) {
-        return new Response(JSON.stringify({ 
-          error: "API_KEY_REQUIRED",
-          message: "OpenAI API key required for this model. Please configure it in settings." 
-        }), { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      const openaiProvider = getOpenAIProvider(apiKeys.openai);
-      aiProvider = openaiProvider(model);
-    } else if (model === "gemini-2.0-flash-preview-image-generation") {
-      if (!apiKeys?.gemini) {
-        return new Response(JSON.stringify({ 
-          error: "API_KEY_REQUIRED",
-          message: "Gemini API key required for this model. Please configure it in settings." 
-        }), { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      return new Response(JSON.stringify({ success: true }), { 
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    } else if (model === "gpt-image-1" || model === "gemini-2.0-flash-preview-image-generation") {
+      // Image generation models are handled above, should not reach here
+      return new Response("Image generation already handled", { status: 500 });
     } else {
       const openrouterApiKey = apiKeys?.openrouter || process.env.OPENROUTER_API_KEY;
       if (!openrouterApiKey) {
@@ -297,11 +315,9 @@ export async function POST(request: NextRequest) {
       aiProvider = openrouter(model);
     }
 
-    if (model === "gpt-image-1") {
-      return new Response(JSON.stringify({ success: true }), { 
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    // Image generation models should have been handled above
+    if (model === "gpt-image-1" || model === "gemini-2.0-flash-preview-image-generation") {
+      return new Response("Image generation already handled", { status: 500 });
     }
 
     const result = await streamText({

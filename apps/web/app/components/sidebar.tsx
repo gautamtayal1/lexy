@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import { api } from '@repo/db/convex/_generated/api';
 import { useAppSelector } from '../store/hooks';
 import ThemeToggle from './ThemeToggle';
-import Image from 'next/image';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,6 +22,7 @@ const Sidebar = ({ isOpen, onToggle, onShareChat }: SidebarProps) => {
     userId: user?.id || ""
   });
   const theme = useAppSelector((state) => state.theme.theme);
+
 
   const deleteThread = useMutation(api.threads.deleteThread);
 
@@ -66,15 +66,13 @@ const Sidebar = ({ isOpen, onToggle, onShareChat }: SidebarProps) => {
         : 'bg-black/5 border-black/10'
     }`}>
       <div className="p-4 flex items-center justify-between">
-        
-          <Image
-            src="/logo.svg"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        
+        <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+          theme === 'dark' ? 'bg-white/30' : 'bg-black/20'
+        }`}>
+          <span className={`text-xl font-bold ${
+            theme === 'dark' ? 'text-white' : 'text-black'
+          }`}>lx</span>
+        </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button 
@@ -154,6 +152,8 @@ const Sidebar = ({ isOpen, onToggle, onShareChat }: SidebarProps) => {
                   </button>
                 </div>
               </div>
+
+
             </div>
           ))}
         </div>

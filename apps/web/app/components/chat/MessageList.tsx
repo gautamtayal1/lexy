@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, Check, ImageIcon } from 'lucide-react';
 import MessageFormatter from '../MessageFormatter';
 import AttachmentList from './AttachmentList';
 import { useAppSelector } from '../../store/hooks';
@@ -19,11 +19,13 @@ interface MessageListProps {
   messages: Message[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
   status: "submitted" | "streaming" | "ready" | "error";
+  selectedModel?: string;
 }
 
-export default function MessageList({ messages, messagesEndRef, status }: MessageListProps) {
+export default function MessageList({ messages, messagesEndRef, status, selectedModel }: MessageListProps) {
   const [expandedReasonings, setExpandedReasonings] = useState<Record<string, boolean>>({});
   const [copiedMessages, setCopiedMessages] = useState<Record<string, boolean>>({});
+  const [showImageShimmer, setShowImageShimmer] = useState(false);
   const theme = useAppSelector((state) => state.theme.theme);
 
   const toggleReasoning = (messageId: string) => {
@@ -49,12 +51,29 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
     messages.length > 0 && 
     messages[messages.length - 1]?.role === 'assistant';
 
+  const isImageGenModel = selectedModel === "gpt-image-1" || selectedModel === "gemini-2.0-flash-preview-image-generation";
+  
   const shouldShowLoading = (status === 'submitted') && 
     (messages.length === 0 || 
      (messages.length > 0 && messages[messages.length - 1]?.role === 'user') ||
      (messages.length > 0 && 
       messages[messages.length - 1]?.role === 'assistant' && 
       (!messages[messages.length - 1]?.content || messages[messages.length - 1]?.content.trim() === '')));
+
+  // Handle image generation shimmer timing
+  React.useEffect(() => {
+    if (isImageGenModel && status === 'submitted') {
+      setShowImageShimmer(true);
+    } else if (isImageGenModel && status === 'ready') {
+      // Keep shimmer for 2 more seconds after stream completes to cover image loading gap
+      const timer = setTimeout(() => {
+        setShowImageShimmer(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else if (!isImageGenModel) {
+      setShowImageShimmer(false);
+    }
+  }, [isImageGenModel, status]);
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -149,30 +168,44 @@ export default function MessageList({ messages, messagesEndRef, status }: Messag
           );
         })}
         
-        {/* Show loading indicator only when waiting for content to start */}
-        {shouldShowLoading && (
-          <div className="flex justify-start mb-6">
-            <div className={`rounded-2xl px-6 py-3 text-base leading-relaxed w-full ${
-              theme === 'dark' ? 'text-white' : 'text-black'
-            }`}>
-              <div className={`flex items-center gap-2 ${
-                theme === 'dark' ? 'text-white/70' : 'text-black/70'
-              }`}>
-                <div className="flex space-x-1">
-                  <div className={`w-2 h-2 rounded-full animate-bounce ${
-                    theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
-                  }`} style={{ animationDelay: '0ms' }}></div>
-                  <div className={`w-2 h-2 rounded-full animate-bounce ${
-                    theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
-                  }`} style={{ animationDelay: '150ms' }}></div>
-                  <div className={`w-2 h-2 rounded-full animate-bounce ${
-                    theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
-                  }`} style={{ animationDelay: '300ms' }}></div>
-                </div>
-                <span className="text-sm">
-                </span>
+        {        /* Show loading indicator or image shimmer */}
+        {(shouldShowLoading || showImageShimmer) && (
+                     <div className="flex justify-start mb-6 w-full ml-7">
+             {(selectedModel === "gpt-image-1" || selectedModel === "gemini-2.0-flash-preview-image-generation" || showImageShimmer) ? (
+               // Image shimmer for image generation models
+               <div className="max-w-[400px]">
+                                 <div className={`rounded-lg w-[300px] h-[300px] max-w-[400px] max-h-[400px] animate-pulse ${
+                   theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
+                 }`}>
+                   <div className="flex items-center justify-center h-full">
+                     <ImageIcon className={`w-12 h-12 ${
+                       theme === 'dark' ? 'text-white/30' : 'text-black/30'
+                     }`} />
+                   </div>
+                 </div>
               </div>
-            </div>
+            ) : (
+              // Regular loading dots for text models
+              <div className={`rounded-2xl px-6 py-3 text-base leading-relaxed ${
+                theme === 'dark' ? 'text-white' : 'text-black'
+              }`}>
+                <div className={`flex items-center gap-2 ${
+                  theme === 'dark' ? 'text-white/70' : 'text-black/70'
+                }`}>
+                  <div className="flex space-x-1">
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${
+                      theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
+                    }`} style={{ animationDelay: '0ms' }}></div>
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${
+                      theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
+                    }`} style={{ animationDelay: '150ms' }}></div>
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${
+                      theme === 'dark' ? 'bg-white/50' : 'bg-black/50'
+                    }`} style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
         

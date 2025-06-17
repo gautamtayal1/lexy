@@ -67,7 +67,7 @@ export default function ChatContainer({
 
   return (
     <>
-      <MessageList messages={messages} messagesEndRef={messagesEndRef} status={status} />
+      <MessageList messages={messages} messagesEndRef={messagesEndRef} status={status} selectedModel={selectedModel} />
       
       <div className="w-[95%] max-w-4xl mx-auto mb-6">
         <div className={`backdrop-blur-xl rounded-3xl shadow-xl border p-3 transition-all duration-300 ease-in-out ${

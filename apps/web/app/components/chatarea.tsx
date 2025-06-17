@@ -77,6 +77,14 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
         topK: finalIsCreativeMode ? 50 : 10,
       },
     },
+    onFinish: async (message) => {
+      // For image generation models, force refresh from database to get correct message IDs
+      if (selectedModel === "gpt-image-1" || selectedModel === "gemini-2.0-flash-preview-image-generation") {
+        setTimeout(() => {
+          setHasHydratedHistory(false);
+        }, 1500);
+      }
+    },
     onError: async (error) => {
       console.error('Chat error:', error);
       

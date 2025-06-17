@@ -59,7 +59,7 @@ export default function AttachmentList({ messageId, messageRole }: AttachmentLis
   }
   
   return (
-    <div className="mt-3 space-y-2 flex flex-col items-start">
+    <div className="mt-3 space-y-2 flex flex-col items-start ml-7">
       {attachments.map((attachment) => (
         <div key={attachment.attachmentId} className="max-w-[400px]">
           <Image
