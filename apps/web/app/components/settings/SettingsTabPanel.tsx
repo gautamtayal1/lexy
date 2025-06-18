@@ -286,14 +286,14 @@ function HistoryContent() {
 
       {!threads ? (
         <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
+          {[...Array(5)].map((_, i) => (
             <div key={i} className={`p-4 rounded-lg animate-pulse ${
               theme === 'dark' ? 'bg-white/5' : 'bg-black/5'
             }`}>
-              <div className={`h-4 rounded mb-2 ${
+              <div className={`h-7 rounded mb-2 ${
                 theme === 'dark' ? 'bg-white/20' : 'bg-black/20'
               }`} style={{ width: `${60 + Math.random() * 30}%` }}></div>
-              <div className={`h-3 rounded ${
+              <div className={`h-8 rounded ${
                 theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
               }`} style={{ width: `${40 + Math.random() * 20}%` }}></div>
             </div>

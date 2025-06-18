@@ -27,7 +27,7 @@ export default function SettingsNavigation({ activeTab, onTabChange }: SettingsN
   ];
 
   return (
-    <div className="flex items-center justify-between w-full max-w-4xl">
+    <div className="flex items-center justify-between w-full max-w-6xl">
       {/* Back to Chat Button - Left Side */}
       <button
         onClick={handleBackToChat}

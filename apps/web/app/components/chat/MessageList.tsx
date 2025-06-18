@@ -87,7 +87,7 @@ export default function MessageList({ messages, messagesEndRef, status, selected
                 <div className="mb-2">
                   <button
                     onClick={() => toggleReasoning(message.id || message.messageId || '')}
-                    className={`flex items-center gap-2 text-base transition-colors ${
+                    className={`flex items-center gap-2 ml-4 text-base transition-colors ${
                       theme === 'dark' 
                         ? 'text-white/70 hover:text-white' 
                         : 'text-black/70 hover:text-black'
@@ -101,7 +101,7 @@ export default function MessageList({ messages, messagesEndRef, status, selected
                     Show Reasoning
                   </button>
                   {expandedReasonings[message.id || message.messageId || ''] && (
-                    <div className={`mt-3 p-4 rounded-lg text-base leading-relaxed ${
+                    <div className={`mt-3 ml-4 p-4 rounded-lg text-base leading-relaxed ${
                       theme === 'dark' 
                         ? 'bg-white/5 text-white/80' 
                         : 'bg-black/5 text-black/80'

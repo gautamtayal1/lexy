@@ -6,7 +6,7 @@ import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { resetChatState, setSelectedModel, setIsTheoMode } from '../store/chatSlice';
+import { resetChatState, setSelectedModel, setIsTheoMode, setIsCreativeMode } from '../store/chatSlice';
 import { useApiKeys } from '../hooks/useApiKeys';
 import axios from 'axios';
 import { useQuery } from 'convex/react';
@@ -34,8 +34,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   const threadId = pathname.split('/')[2];
   const [file, setFile] = useState<any | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [localIsCreativeMode, setLocalIsCreativeMode] = useState(false);
-  const finalIsCreativeMode = isCreativeMode !== undefined ? isCreativeMode : localIsCreativeMode;
+  // Use Redux state for creative mode instead of local state
   const [apiError, setApiError] = useState<string | null>(null);
 
   const isThreadExists = useQuery(api.threads.isThreadExists, {
@@ -73,8 +72,8 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
       apiKeys: apiKeys,
       isTheoMode: isTheoMode,
       modelParams: {
-        temperature: finalIsCreativeMode ? 0.8 : 0.3,
-        topK: finalIsCreativeMode ? 50 : 10,
+        temperature: isCreativeMode ? 0.8 : 0.3,
+        topK: isCreativeMode ? 50 : 10,
       },
     },
     onFinish: async (message) => {
@@ -228,7 +227,9 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
   };
 
   const handleToggleCreativeMode = () => {
-    setLocalIsCreativeMode(!localIsCreativeMode);
+    const newCreativeMode = !isCreativeMode;
+    dispatch(setIsCreativeMode(newCreativeMode));
+    console.log('Creative mode toggled to:', newCreativeMode);
   };
 
   const handleToggleTheoMode = () => {
@@ -283,7 +284,7 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
         input={input}
         onInputChange={handleInputChange}
         onSubmit={handleSubmitWithCleanup}
-        isCreativeMode={finalIsCreativeMode}
+        isCreativeMode={isCreativeMode}
         onToggleCreativeMode={handleToggleCreativeMode}
         isTheoMode={isTheoMode}
         onToggleTheoMode={handleToggleTheoMode}

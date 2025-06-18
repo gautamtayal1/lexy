@@ -93,9 +93,7 @@ export default function ChatControls({
   };
 
   const handleCreativeToggle = () => {
-    console.log('Creative mode before toggle:', isCreativeMode);
     onToggleCreativeMode();
-    console.log('Creative mode after toggle:', !isCreativeMode);
   };
 
   return (
@@ -125,8 +123,8 @@ export default function ChatControls({
           className={`px-3 py-2 rounded-3xl font-medium transition-colors flex items-center gap-2 text-sm ${
             isTheoMode
               ? theme === 'dark'
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-400/50'
-                : 'bg-blue-500/20 text-blue-700 border border-blue-400/50'
+                ? 'bg-base/50 text-white border border-violet-500/70 shadow-lg shadow-violet-500/20'
+                : 'bg-gray-500/80 text-white border border-gray-500/70 shadow-lg shadow-gray-500/20'
               : theme === 'dark' 
                 ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
                 : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
@@ -141,8 +139,8 @@ export default function ChatControls({
           className={`px-3 py-2 rounded-3xl font-medium transition-colors flex items-center gap-2 text-sm ${
             isCreativeMode
               ? theme === 'dark'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-400/50'
-                : 'bg-purple-500/20 text-purple-700 border border-purple-400/50'
+                ? 'bg-base/50 text-white border border-violet-500/70 shadow-lg shadow-violet-500/20'
+                : 'bg-base/50 text-white border border-gray-500/70 shadow-lg shadow-gray-500/20'
               : theme === 'dark' 
                 ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
                 : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'

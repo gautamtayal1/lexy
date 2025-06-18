@@ -92,7 +92,7 @@ const MessageFormatter: React.FC<MessageFormatterProps> = ({ content, className 
                     borderRadius: '0 0 0.5rem 0.5rem',
                     border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
                     borderTop: 'none',
-                    backgroundColor: theme === 'dark' ? '#1e1a29' : '#f8f9fa',
+                    backgroundColor: theme === 'dark' ? '#0f0f23' : '#fafbfc',
                   }}
                   {...props}
                 >
@@ -117,9 +117,16 @@ const MessageFormatter: React.FC<MessageFormatterProps> = ({ content, className 
             }`}>{children}</h3>
           ),
           p: ({ children }) => (
-            <p className={`leading-relaxed my-2 text-lg ${
+            <p className={`leading-relaxed mb-4 mt-2 text-lg ${
               theme === 'dark' ? 'text-white/85' : 'text-black/85'
             }`}>{children}</p>
+          ),
+          hr: ({ children }) => (
+            <hr className={`my-6 border-0 h-px ${
+              theme === 'dark' 
+                ? 'bg-gradient-to-r from-transparent via-white/20 to-transparent' 
+                : 'bg-gradient-to-r from-transparent via-black/20 to-transparent'
+            }`} />
           ),
           ul: ({ children }) => (
             <ul className="space-y-1 my-2">{children}</ul>

@@ -119,7 +119,7 @@ const Sidebar = ({ isOpen, onToggle, onShareChat }: SidebarProps) => {
               >
                 <p className={`text-sm font-medium flex-1 ${
                   theme === 'dark' ? 'text-white' : 'text-black'
-                }`}>{thread.title}</p>
+                }`}>{thread.title || "New Chat"}</p>
                 
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button

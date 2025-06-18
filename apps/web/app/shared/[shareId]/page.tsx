@@ -73,7 +73,7 @@ export default function SharedChatPage() {
     content: message.content,
     messageId: message.messageId,
     createdAt: new Date(message.createdAt),
-    reasoning: message.modelResponse,
+    reasoning: message.modelParams?.reasoning
   }));
 
   return (
