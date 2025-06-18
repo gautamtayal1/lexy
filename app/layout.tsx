@@ -26,6 +26,10 @@ export default function RootLayout({
             <ClerkProvider
               signInUrl="/sign-in"
               signUpUrl="/sign-up"
+              afterSignInUrl="/"
+              afterSignUpUrl="/"
+              signInForceRedirectUrl="/"
+              signUpForceRedirectUrl="/"
             >
               <ConvexClientProvider>
                 <div className="relative z-10">
