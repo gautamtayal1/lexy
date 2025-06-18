@@ -14,6 +14,15 @@ export default [
     },
     languageOptions: {
       parser: tsParser,
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        navigator: "readonly",
+        console: "readonly",
+        confirm: "readonly",
+        alert: "readonly",
+        prompt: "readonly",
+      },
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",

@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disables React.StrictMode on the client to avoid double-invocation of
-  // lifecycle logic during development. Remove or set to `true` if you want
-  // Strict Mode back.
-  reactStrictMode: false,
+  // Enable React.StrictMode for production
+  reactStrictMode: process.env.NODE_ENV === 'production',
+  
+  // Enable experimental features for better performance
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react'],
+  },
+  
+  // Optimize images
   images: {
+    formats: ['image/webp', 'image/avif'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -30,7 +37,46 @@ const nextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
+      // Allow any DigitalOcean Spaces domain for flexibility
+      {
+        protocol: 'https',
+        hostname: '*.digitaloceanspaces.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
+  },
+  
+  // Production optimizations
+  poweredByHeader: false,
+  compress: true,
+  
+  // Environment variables validation
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  
+  // Headers for security and performance
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ];
   },
 };
 
