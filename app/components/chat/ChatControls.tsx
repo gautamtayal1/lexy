@@ -15,6 +15,9 @@ interface ChatControlsProps {
   onFileUpload: (files: any[]) => void;
   onFileUploadStart: (files: any[]) => void;
   onSubmit: () => void;
+  status?: "submitted" | "streaming" | "ready" | "error";
+  input?: string;
+  uploadedFiles?: any[];
 }
 
 export default function ChatControls({
@@ -26,7 +29,10 @@ export default function ChatControls({
   onModelChange,
   onFileUpload,
   onFileUploadStart,
-  onSubmit
+  onSubmit,
+  status = "ready",
+  input = "",
+  uploadedFiles = []
 }: ChatControlsProps) {
   const theme = useAppSelector((state) => state.theme.theme);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +102,9 @@ export default function ChatControls({
     onToggleCreativeMode();
   };
 
+  // Only disable during active processing - when status is not ready
+  const isDisabled = status !== "ready";
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2.5">
@@ -109,8 +118,14 @@ export default function ChatControls({
         />
         
         <button
-          onClick={handleAttachClick}
+          onClick={selectedModel.toLowerCase().includes('llama') ? undefined : handleAttachClick}
+          disabled={selectedModel.toLowerCase().includes('llama')}
+          title={selectedModel.toLowerCase().includes('llama') ? "Not working with llama models" : "Attach files"}
           className={`p-2.5 rounded-3xl font-medium transition-colors ${
+            selectedModel.toLowerCase().includes('llama') 
+              ? 'opacity-50 cursor-not-allowed' 
+              : ''
+          } ${
             theme === 'dark' 
               ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20' 
               : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
@@ -156,11 +171,14 @@ export default function ChatControls({
         <ModelDropdown selectedModel={selectedModel} onModelChange={onModelChange} />
         <button  
           className={`p-3 rounded-3xl transition-colors ${
+            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+          } ${
             theme === 'dark' 
               ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20' 
               : 'bg-black/10 hover:bg-black/15 text-black border border-black/20'
           }`}
-          onClick={onSubmit}
+          onClick={isDisabled ? undefined : onSubmit}
+          disabled={isDisabled}
         >
           <ArrowUp className="h-4 w-4 " />
         </button>

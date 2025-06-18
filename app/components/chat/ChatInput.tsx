@@ -8,9 +8,10 @@ interface ChatInputProps {
   onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: (e?: React.FormEvent) => void;
   placeholder?: string;
+  uploadedFiles?: any[];
 }
 
-export default function ChatInput({ input, onInputChange, onSubmit, placeholder = "Type your message..." }: ChatInputProps) {
+export default function ChatInput({ input, onInputChange, onSubmit, placeholder = "Type your message...", uploadedFiles = [] }: ChatInputProps) {
   const theme = useAppSelector((state) => state.theme.theme);
 
   return (
@@ -25,7 +26,9 @@ export default function ChatInput({ input, onInputChange, onSubmit, placeholder 
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            onSubmit(e);
+            if (input.trim() || uploadedFiles.length > 0) {
+              onSubmit(e);
+            }
           }
         }}
         placeholder={placeholder}

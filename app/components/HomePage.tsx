@@ -36,9 +36,9 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!input.trim() || isSubmitting) return;
+    if ((!input.trim() && uploadedFiles.length === 0) || isSubmitting) return;
     
-    dispatch(setQuestion(input));
+    dispatch(setQuestion(input || ""));
     
     if (uploadedFiles.length > 0) {
       sessionStorage.setItem('pendingFiles', JSON.stringify(uploadedFiles));
@@ -164,6 +164,7 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
             onInputChange={handleInputChange} 
             onSubmit={handleSubmit}
             placeholder="Ask me anything..."
+            uploadedFiles={uploadedFiles}
           />
           
           <ChatControls
@@ -176,6 +177,9 @@ const HomePage = ({ isSidebarOpen, onToggleSidebar }: HomePageProps) => {
             onFileUpload={handleFileUpload}
             onFileUploadStart={handleFileUploadStart}
             onSubmit={handleSubmit}
+            status={isSubmitting ? "submitted" : "ready"}
+            input={input}
+            uploadedFiles={uploadedFiles}
           />
         </div>
       </div>

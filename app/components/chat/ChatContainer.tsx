@@ -80,7 +80,8 @@ export default function ChatContainer({
           <ChatInput 
             input={input} 
             onInputChange={onInputChange} 
-            onSubmit={onSubmit} 
+            onSubmit={onSubmit}
+            uploadedFiles={uploadedFiles}
           />
           
           <ChatControls
@@ -93,6 +94,9 @@ export default function ChatContainer({
             onFileUpload={onFileUpload}
             onFileUploadStart={onFileUploadStart}
             onSubmit={onSubmit}
+            status={status}
+            input={input}
+            uploadedFiles={uploadedFiles}
           />
         </div>
       </div>
