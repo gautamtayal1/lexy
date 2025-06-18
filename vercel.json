@@ -1,11 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
   "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "functions": {
-    "app/api/*/route.ts": {
-      "runtime": "edge"
-    }
-  }
+  "framework": "nextjs"
 } 
