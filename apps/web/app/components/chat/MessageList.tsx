@@ -82,7 +82,7 @@ export default function MessageList({ messages, messagesEndRef, status, selected
           const isLastMessage = index === messages.length - 1;
           const isStreamingThisMessage = isStreamingAssistantMessage && isLastMessage;
           return (
-            <div key={message.id || message.messageId} className="space-y-2 mb-6">
+            <div key={message.id || message.messageId} className="mb-6">
               {message.role === 'assistant' && message.reasoning && (
                 <div className="mb-2">
                   <button
@@ -142,7 +142,7 @@ export default function MessageList({ messages, messagesEndRef, status, selected
               
               {/* Copy button for assistant messages - only show when not streaming */}
               {message.role === 'assistant' && !isStreamingThisMessage && (
-                <div className="flex justify-start ml-5">
+                <div className="flex justify-start ml-5 -mt-3">
                   <button
                     onClick={() => copyMessage(message.id || message.messageId || '', message.content)}
                     className={`flex items-center gap-2 text-sm transition-colors px-2 py-1 rounded-lg ${
