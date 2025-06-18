@@ -161,11 +161,18 @@ const ChatArea = ({ isSidebarOpen, onToggleSidebar, shareModalData, onCloseShare
         }, 100);
 
         const setThreadTitle = async () => {
-          await axios.post("/api/thread/title", {
-            threadId,
-            userId: user?.id,
-            question
-          })
+          // Add a delay to ensure the thread is created before trying to update the title
+          setTimeout(async () => {
+            try {
+              await axios.post("/api/thread/title", {
+                threadId,
+                userId: user?.id,
+                question
+              });
+            } catch (error) {
+              console.error("Failed to set thread title:", error);
+            }
+          }, 1000); 
         }
         setThreadTitle();
         setIsInitialized(true);

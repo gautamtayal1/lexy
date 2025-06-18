@@ -2,8 +2,6 @@
 
 A modern, feature-rich AI chat application built for the t3.chat clonethon. This project replicates and extends the functionality of t3.chat with support for multiple AI models, real-time conversations, and advanced features.
 
-![T3.Chat Clone](public/logo.svg)
-
 ## ✨ Features
 
 ### 🎯 Core Features

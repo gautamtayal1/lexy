@@ -65,6 +65,44 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // First, check if the thread exists (with retry logic for race conditions)
+    let threadExists = false;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (!threadExists && retryCount < maxRetries) {
+      try {
+        threadExists = await convex.query(api.threads.isThreadExists, {
+          userId,
+          threadId,
+        });
+        
+        if (!threadExists) {
+          console.log(`Thread not found on attempt ${retryCount + 1}, retrying...`);
+          retryCount++;
+          
+          if (retryCount < maxRetries) {
+            // Wait a bit before retrying (race condition with thread creation)
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+      } catch (queryError) {
+        console.error("Failed to check if thread exists:", queryError);
+        return NextResponse.json({ 
+          error: "Database query failed", 
+          details: `Failed to verify thread existence: ${queryError instanceof Error ? queryError.message : String(queryError)}` 
+        }, { status: 500 });
+      }
+    }
+    
+    if (!threadExists) {
+      console.error("Thread not found after all retries:", { userId, threadId });
+      return NextResponse.json({ 
+        error: "Thread not found", 
+        details: `Thread with ID ${threadId} not found for user ${userId}. The thread may have been deleted or never created.` 
+      }, { status: 404 });
+    }
+
     // Try to update the thread with the generated title
     try {
       await convex.mutation(api.threads.updateThread, {

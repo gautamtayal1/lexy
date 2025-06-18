@@ -21,8 +21,6 @@ interface FilePreviewProps {
 export default function FilePreview({ uploadedFiles, onRemoveFile }: FilePreviewProps) {
   const theme = useAppSelector((state) => state.theme.theme);
   
-  console.log('FilePreview uploadedFiles:', uploadedFiles);
-  
   if (uploadedFiles.length === 0) return null;
 
   return (
