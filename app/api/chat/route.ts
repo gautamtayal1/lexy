@@ -315,7 +315,6 @@ export async function POST(request: NextRequest) {
       aiProvider = openrouter(model);
     }
 
-    // Image generation models should have been handled above
     if (model === "gpt-image-1" || model === "gemini-2.0-flash-preview-image-generation") {
       return new Response("Image generation already handled", { status: 500 });
     }
