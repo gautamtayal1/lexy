@@ -15,6 +15,7 @@ export default [
     languageOptions: {
       parser: tsParser,
       globals: {
+        // Browser globals
         window: "readonly",
         document: "readonly",
         navigator: "readonly",
@@ -22,6 +23,43 @@ export default [
         confirm: "readonly",
         alert: "readonly",
         prompt: "readonly",
+        localStorage: "readonly",
+        sessionStorage: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        fetch: "readonly",
+        FormData: "readonly",
+        File: "readonly",
+        btoa: "readonly",
+        atob: "readonly",
+        crypto: "readonly",
+        
+        // DOM types
+        HTMLElement: "readonly",
+        HTMLDivElement: "readonly",
+        HTMLInputElement: "readonly",
+        HTMLTextAreaElement: "readonly",
+        MouseEvent: "readonly",
+        Node: "readonly",
+        StorageEvent: "readonly",
+        
+        // Web APIs
+        ReadableStream: "readonly",
+        TextEncoder: "readonly",
+        TextDecoder: "readonly",
+        Response: "readonly",
+        Request: "readonly",
+        
+        // Node.js globals (for API routes)
+        process: "readonly",
+        Buffer: "readonly",
+        global: "readonly",
+        
+        // React
+        React: "readonly",
+        JSX: "readonly",
       },
       parserOptions: {
         ecmaVersion: "latest",
@@ -37,6 +75,9 @@ export default [
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       "no-console": "warn",
+      "no-undef": "error",
+      "no-empty": "warn",
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
   {
