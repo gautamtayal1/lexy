@@ -168,21 +168,21 @@ export default function MessageList({ messages, messagesEndRef, status, selected
           );
         })}
         
-        {        /* Show loading indicator or image shimmer */}
+        {/* Show loading indicator or image shimmer */}
         {(shouldShowLoading || showImageShimmer) && (
-                     <div className="flex justify-start mb-6 w-full ml-7">
-             {(selectedModel === "gpt-image-1" || selectedModel === "gemini-2.0-flash-preview-image-generation" || showImageShimmer) ? (
-               // Image shimmer for image generation models
-               <div className="max-w-[400px]">
-                                 <div className={`rounded-lg w-[300px] h-[300px] max-w-[400px] max-h-[400px] animate-pulse ${
-                   theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
-                 }`}>
-                   <div className="flex items-center justify-center h-full">
-                     <ImageIcon className={`w-12 h-12 ${
-                       theme === 'dark' ? 'text-white/30' : 'text-black/30'
-                     }`} />
-                   </div>
-                 </div>
+          <div className="flex justify-start mb-6 w-full">
+            {(selectedModel === "gpt-image-1" || selectedModel === "gemini-2.0-flash-preview-image-generation" || showImageShimmer) ? (
+              // Image shimmer for image generation models
+              <div className="max-w-[400px]">
+                <div className={`rounded-lg w-[300px] h-[300px] max-w-[400px] max-h-[400px] animate-pulse ${
+                  theme === 'dark' ? 'bg-white/10' : 'bg-black/10'
+                }`}>
+                  <div className="flex items-center justify-center h-full">
+                    <ImageIcon className={`w-12 h-12 ${
+                      theme === 'dark' ? 'text-white/30' : 'text-black/30'
+                    }`} />
+                  </div>
+                </div>
               </div>
             ) : (
               // Regular loading dots for text models

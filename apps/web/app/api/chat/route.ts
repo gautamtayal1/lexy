@@ -345,6 +345,7 @@ export async function POST(request: NextRequest) {
       topK: modelParams.topK,
       temperature: modelParams.temperature,
       onFinish: async ({text}) => {
+        console.log('text', text);
         await convex.mutation(api.messages.patchMessage, {
           messageId: assistantMessageId,
           content: text,

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Trash2, Eye, EyeOff, Check, Copy } from 'lucide-react';
-import { SettingsTab, SettingsTabPanelProps } from '../../types/settings';
+import { Trash2, Eye, EyeOff } from 'lucide-react';
+import { SettingsTabPanelProps } from '../../types/settings';
 import { apiKeyUtils, ApiKeyConfig } from '../../utils/apiKeys';
 import { useApiKeys } from '../../hooks/useApiKeys';
 import { useAppSelector } from '../../store/hooks';
